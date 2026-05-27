@@ -6,6 +6,7 @@ import { Link } from '@/i18n/routing'
 import { apiGet } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import { Demand, categoryColors, countryList, demandCategories } from '@/types'
+import ChatButton from '@/components/messages/ChatButton'
 
 export default function DemandsPage() {
   const t = useTranslations()
@@ -150,6 +151,13 @@ export default function DemandsPage() {
                       <span className="text-sm text-gray-500">
                         {countryInfo ? `${countryInfo.flag} ${countryInfo.name}` : demand.country}
                       </span>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-white/5">
+                      <ChatButton
+                        resourceUserId={demand.user_id}
+                        resourceTitle={demand.title}
+                        demandId={demand.id}
+                      />
                     </div>
                   </div>
                 )

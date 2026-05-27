@@ -6,6 +6,7 @@ import { Link } from '@/i18n/routing'
 import { apiGet } from '@/lib/api'
 import { useAuthStore } from '@/store/authStore'
 import { Resource, categoryColors, countryList, resourceCategories } from '@/types'
+import ChatButton from '@/components/messages/ChatButton'
 
 export default function ResourcesPage() {
   const t = useTranslations()
@@ -151,6 +152,13 @@ export default function ResourcesPage() {
                         {countryInfo ? `${countryInfo.flag} ${countryInfo.name}` : resource.country}
                       </span>
                       <span className="text-sm text-gray-600">{resource.contact}</span>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-white/5">
+                      <ChatButton
+                        resourceUserId={resource.user_id}
+                        resourceTitle={resource.title}
+                        resourceId={resource.id}
+                      />
                     </div>
                   </div>
                 )

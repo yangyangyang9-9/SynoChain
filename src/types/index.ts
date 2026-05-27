@@ -97,6 +97,66 @@ export const resourceCategories = ['工厂', '产品', '渠道', '服务', '跨�
 
 export const demandCategories = ['采购需求', '合作需求', '代理需求', '供应链需求', '海外渠道需求', '其他']
 
+export interface Message {
+  id: string
+  conversation_id: string
+  sender_id: string
+  content: string
+  content_type: string
+  created_at: string
+  sender_email: string
+}
+
+export interface ConversationParticipant {
+  user_id: string
+  email: string
+}
+
+export interface Conversation {
+  id: string
+  subject: string
+  resource_id?: string
+  demand_id?: string
+  created_at: string
+  updated_at: string
+  last_message?: string
+  unread_count: number
+  participants: ConversationParticipant[]
+}
+
+export interface Draft {
+  id: string
+  user_id: string
+  title: string
+  description: string
+  category: string
+  contact: string
+  country: string
+  industry: string
+  tags: string[]
+  budget: string
+  quantity: string
+  image_urls: string[]
+  status: string
+  created_at: string
+  updated_at: string
+}
+
+export interface UserProfile {
+  id: string
+  user_id: string
+  display_name: string
+  avatar_url: string
+  company: string
+  position: string
+  phone: string
+  website: string
+  bio: string
+  notification_email: boolean
+  notification_message: boolean
+  notification_match: boolean
+}
+
 export const categoryColors: Record<string, string> = {
   '工厂': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
   '产品': 'bg-blue-500/20 text-blue-400 border-blue-500/30',

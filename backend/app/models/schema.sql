@@ -87,6 +87,91 @@ CREATE TABLE IF NOT EXISTS ai_recommendations (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- 8. user_profiles 用户资料表
+CREATE TABLE IF NOT EXISTS user_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+  display_name TEXT,
+  avatar_url TEXT,
+  company TEXT,
+  position TEXT,
+  phone TEXT,
+  website TEXT,
+  bio TEXT,
+  notification_email BOOLEAN DEFAULT TRUE,
+  notification_message BOOLEAN DEFAULT TRUE,
+  notification_match BOOLEAN DEFAULT TRUE,
+  updated_at TIMESTAMP DEFAULT NOW(),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 9. conversations 会话表
+CREATE TABLE IF NOT EXISTS conversations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  resource_id UUID REFERENCES resources(id) ON DELETE SET NULL,
+  demand_id UUID REFERENCES demands(id) ON DELETE SET NULL,
+  subject TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 10. conversation_participants 会话参与者表
+CREATE TABLE IF NOT EXISTS conversation_participants (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  last_read_at TIMESTAMP DEFAULT NOW(),
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(conversation_id, user_id)
+);
+
+-- 11. messages 消息表
+CREATE TABLE IF NOT EXISTS messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE,
+  sender_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  content_type TEXT DEFAULT 'text',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 12. resource_drafts 资源草稿表
+CREATE TABLE IF NOT EXISTS resource_drafts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT,
+  description TEXT,
+  category TEXT,
+  contact TEXT,
+  country TEXT,
+  industry TEXT,
+  tags TEXT[],
+  budget TEXT,
+  quantity TEXT,
+  image_urls TEXT[],
+  status TEXT DEFAULT 'draft',
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 13. demand_drafts 需求草稿表
+CREATE TABLE IF NOT EXISTS demand_drafts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT,
+  description TEXT,
+  category TEXT,
+  country TEXT,
+  industry TEXT,
+  tags TEXT[],
+  budget TEXT,
+  quantity TEXT,
+  image_urls TEXT[],
+  status TEXT DEFAULT 'draft',
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
 -- 启用 Row Level Security
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE resources ENABLE ROW LEVEL SECURITY;
@@ -95,6 +180,12 @@ ALTER TABLE ai_matches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE premium_resources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_recommendations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE conversation_participants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE resource_drafts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE demand_drafts ENABLE ROW LEVEL SECURITY;
 
 -- RLS 策略
 
@@ -148,3 +239,62 @@ CREATE POLICY "Users can read own recommendations" ON ai_recommendations
   FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can update own recommendations" ON ai_recommendations
   FOR UPDATE USING (auth.uid() = user_id);
+
+-- user_profiles: 用户可读写自己的
+CREATE POLICY "Users can read own profile" ON user_profiles
+  FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own profile" ON user_profiles
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own profile" ON user_profiles
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- conversations: 参与者可读
+CREATE POLICY "Participants can read conversations" ON conversations
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM conversation_participants cp
+      WHERE cp.conversation_id = id AND cp.user_id = auth.uid()
+    )
+  );
+
+-- conversation_participants: 参与者可读
+CREATE POLICY "Users can read own participations" ON conversation_participants
+  FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert participations" ON conversation_participants
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- messages: 会话参与者可读
+CREATE POLICY "Participants can read messages" ON messages
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM conversation_participants cp
+      WHERE cp.conversation_id = messages.conversation_id AND cp.user_id = auth.uid()
+    )
+  );
+CREATE POLICY "Participants can insert messages" ON messages
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM conversation_participants cp
+      WHERE cp.conversation_id = messages.conversation_id AND cp.user_id = auth.uid()
+    )
+  );
+
+-- resource_drafts: 创建者可读写
+CREATE POLICY "Users can read own drafts" ON resource_drafts
+  FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own drafts" ON resource_drafts
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own drafts" ON resource_drafts
+  FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own drafts" ON resource_drafts
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- demand_drafts: 创建者可读写
+CREATE POLICY "Users can read own demand drafts" ON demand_drafts
+  FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own demand drafts" ON demand_drafts
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own demand drafts" ON demand_drafts
+  FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own demand drafts" ON demand_drafts
+  FOR DELETE USING (auth.uid() = user_id);

@@ -8,7 +8,9 @@
     "login": "Login",
     "register": "Register",
     "logout": "Logout",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "messages": "Messages",
+    "settings": "Settings"
   },
   "hero": {
     "title": "AI-Powered Global Business Connection Platform",
@@ -92,7 +94,13 @@
     "titleRequired": "Title is required",
     "descriptionRequired": "Description is required",
     "categoryRequired": "Category is required",
-    "published": "Resource published successfully"
+    "published": "Resource published successfully",
+    "industry": "Industry",
+    "tags": "Tags (comma separated)",
+    "budget": "Budget Range",
+    "quantity": "Quantity/Scale",
+    "saveDraft": "Save Draft",
+    "publish": "Publish"
   },
   "demands": {
     "title": "Global Business Demands",
@@ -111,7 +119,13 @@
     "titleRequired": "Title is required",
     "descriptionRequired": "Description is required",
     "categoryRequired": "Category is required",
-    "published": "Demand published successfully"
+    "published": "Demand published successfully",
+    "industry": "Industry",
+    "tags": "Tags (comma separated)",
+    "budget": "Budget Range",
+    "quantity": "Quantity/Scale",
+    "saveDraft": "Save Draft",
+    "publish": "Publish"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -133,7 +147,44 @@
     "editResource": "Edit Resource",
     "editDemand": "Edit Demand",
     "save": "Save",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "drafts": "Drafts",
+    "noDrafts": "No drafts"
+  },
+  "messages": {
+    "title": "Messages",
+    "inbox": "Inbox",
+    "noConversations": "No conversations",
+    "selectConversation": "Select a conversation to start chatting",
+    "sendMessage": "Send",
+    "typeMessage": "Type a message...",
+    "newMessage": "New Message",
+    "contactPublisher": "Contact Publisher",
+    "contactSupplier": "Contact Supplier",
+    "startConversation": "Start Conversation",
+    "you": "You"
+  },
+  "settings": {
+    "title": "Account Settings",
+    "profile": "Profile",
+    "password": "Change Password",
+    "notifications": "Notifications",
+    "displayName": "Display Name",
+    "company": "Company",
+    "position": "Position",
+    "phone": "Phone",
+    "website": "Website",
+    "bio": "Bio",
+    "saveProfile": "Save Profile",
+    "oldPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "changePassword": "Change Password",
+    "passwordChanged": "Password changed successfully",
+    "profileUpdated": "Profile updated successfully",
+    "notificationEmail": "Email Notifications",
+    "notificationMessage": "Message Notifications",
+    "notificationMatch": "Match Notifications"
   },
   "subscriptionPage": {
     "title": "Unlock 5,000+ Premium Supply Chain Resources",

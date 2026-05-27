@@ -14,6 +14,10 @@ interface ResourceFormData {
   category: string
   contact: string
   country: string
+  industry: string
+  tags: string
+  budget: string
+  quantity: string
 }
 
 export default function PublishResourcePage() {
@@ -54,15 +58,40 @@ export default function PublishResourcePage() {
     )
   }
 
+  const buildPayload = (data: ResourceFormData) => {
+    return {
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      contact: data.contact,
+      country: data.country,
+      industry: data.industry || '',
+      tags: data.tags ? data.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
+      budget: data.budget || '',
+      quantity: data.quantity || '',
+    }
+  }
+
   const onSubmit = async (data: ResourceFormData) => {
     setServerError('')
     setSuccessMsg('')
     try {
-      await apiPost('/api/resources', data, token || undefined)
+      await apiPost('/api/resources', buildPayload(data), token || undefined)
       setSuccessMsg(t('resources.published'))
       setTimeout(() => {
         router.push('/dashboard')
       }, 1500)
+    } catch (err) {
+      setServerError(err instanceof Error ? err.message : t('common.error'))
+    }
+  }
+
+  const onSaveDraft = async (data: ResourceFormData) => {
+    setServerError('')
+    setSuccessMsg('')
+    try {
+      await apiPost('/api/drafts/resources', buildPayload(data), token || undefined)
+      setSuccessMsg(t('resources.draftSaved'))
     } catch (err) {
       setServerError(err instanceof Error ? err.message : t('common.error'))
     }
@@ -109,18 +138,60 @@ export default function PublishResourcePage() {
               {errors.description && <p className="mt-1 text-xs text-red-400">{errors.description.message}</p>}
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">{t('resources.category')}</label>
+                <select
+                  {...register('category', { required: t('resources.categoryRequired') })}
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/10 text-gray-300 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 transition-all"
+                >
+                  <option value="">{t('resources.category')}</option>
+                  {resourceCategories.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+                {errors.category && <p className="mt-1 text-xs text-red-400">{errors.category.message}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">{t('resources.industry')}</label>
+                <input
+                  type="text"
+                  {...register('industry')}
+                  placeholder={t('resources.industry')}
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 transition-all"
+                />
+              </div>
+            </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2">{t('resources.category')}</label>
-              <select
-                {...register('category', { required: t('resources.categoryRequired') })}
-                className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/10 text-gray-300 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 transition-all"
-              >
-                <option value="">{t('resources.category')}</option>
-                {resourceCategories.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-              {errors.category && <p className="mt-1 text-xs text-red-400">{errors.category.message}</p>}
+              <label className="block text-sm font-medium text-gray-400 mb-2">{t('resources.tags')}</label>
+              <input
+                type="text"
+                {...register('tags')}
+                placeholder={t('resources.tags')}
+                className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 transition-all"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">{t('resources.budget')}</label>
+                <input
+                  type="text"
+                  {...register('budget')}
+                  placeholder={t('resources.budget')}
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">{t('resources.quantity')}</label>
+                <input
+                  type="text"
+                  {...register('quantity')}
+                  placeholder={t('resources.quantity')}
+                  className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 transition-all"
+                />
+              </div>
             </div>
 
             <div>
@@ -148,13 +219,23 @@ export default function PublishResourcePage() {
               {errors.country && <p className="mt-1 text-xs text-red-400">{errors.country.message}</p>}
             </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 transition-all shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? t('common.loading') : t('resources.submit')}
-            </button>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onClick={handleSubmit(onSaveDraft)}
+                className="flex-1 py-3 rounded-xl text-sm font-semibold border border-white/10 text-gray-300 hover:text-white hover:border-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? t('common.loading') : t('resources.saveDraft')}
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 transition-all shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? t('common.loading') : t('resources.submit')}
+              </button>
+            </div>
           </form>
         </div>
       </div>

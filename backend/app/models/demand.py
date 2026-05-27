@@ -9,6 +9,11 @@ class DemandCreate(BaseModel):
     description: str
     category: str
     country: str
+    industry: Optional[str] = None
+    tags: Optional[list[str]] = None
+    budget: Optional[str] = None
+    quantity: Optional[str] = None
+    image_urls: Optional[list[str]] = None
 
 
 class DemandUpdate(BaseModel):
@@ -16,6 +21,11 @@ class DemandUpdate(BaseModel):
     description: Optional[str] = None
     category: Optional[str] = None
     country: Optional[str] = None
+    industry: Optional[str] = None
+    tags: Optional[list[str]] = None
+    budget: Optional[str] = None
+    quantity: Optional[str] = None
+    image_urls: Optional[list[str]] = None
 
 
 class DemandResponse(BaseModel):
@@ -25,4 +35,9 @@ class DemandResponse(BaseModel):
     description: str
     category: str
     country: str
+    industry: Optional[str] = None
+    tags: Optional[list[str]] = None
+    budget: Optional[str] = None
+    quantity: Optional[str] = None
+    image_urls: Optional[list[str]] = None
     created_at: datetime

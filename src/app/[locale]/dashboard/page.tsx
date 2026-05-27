@@ -5,10 +5,10 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import { useAuthStore } from '@/store/authStore'
 import { apiGet, apiPut, apiDelete } from '@/lib/api'
-import { Resource, Demand, AIRecommendation, categoryColors, resourceCategories, demandCategories, countryList } from '@/types'
+import { Resource, Demand, AIRecommendation, Draft, categoryColors, resourceCategories, demandCategories, countryList } from '@/types'
 import { useForm } from 'react-hook-form'
 
-type Tab = 'resources' | 'demands' | 'recommendations' | 'subscription'
+type Tab = 'resources' | 'demands' | 'drafts' | 'recommendations' | 'subscription'
 
 export default function DashboardPage() {
   const t = useTranslations()
@@ -16,11 +16,14 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<Tab>('resources')
   const [resources, setResources] = useState<Resource[]>([])
   const [demands, setDemands] = useState<Demand[]>([])
+  const [resourceDrafts, setResourceDrafts] = useState<Draft[]>([])
+  const [demandDrafts, setDemandDrafts] = useState<Draft[]>([])
   const [recommendations, setRecommendations] = useState<AIRecommendation[]>([])
   const [loading, setLoading] = useState(true)
+  const [draftsLoading, setDraftsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [editModal, setEditModal] = useState<{ type: 'resource' | 'demand'; id: string } | null>(null)
-  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'resource' | 'demand'; id: string } | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'resource' | 'demand' | 'draft'; id: string; draftType?: 'resource' | 'demand' } | null>(null)
   const [actionMsg, setActionMsg] = useState('')
 
   useEffect(() => {
@@ -54,15 +57,49 @@ export default function DashboardPage() {
     fetchData()
   }, [token, t])
 
+  const fetchDrafts = async () => {
+    if (!token) return
+    setDraftsLoading(true)
+    try {
+      const [resDrafts, demDrafts] = await Promise.all([
+        apiGet('/api/drafts/resources', token),
+        apiGet('/api/drafts/demands', token),
+      ])
+      setResourceDrafts(Array.isArray(resDrafts) ? resDrafts : resDrafts.items || [])
+      setDemandDrafts(Array.isArray(demDrafts) ? demDrafts : demDrafts.items || [])
+    } catch (err) {
+      setActionMsg(err instanceof Error ? err.message : t('dashboard.loadDraftError'))
+      setTimeout(() => setActionMsg(''), 3000)
+    } finally {
+      setDraftsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'drafts' && token) {
+      fetchDrafts()
+    }
+  }, [activeTab, token])
+
   const handleDelete = async () => {
     if (!deleteConfirm || !token) return
     try {
-      const endpoint = deleteConfirm.type === 'resource' ? '/api/resources' : '/api/demands'
-      await apiDelete(`${endpoint}/${deleteConfirm.id}`, token)
-      if (deleteConfirm.type === 'resource') {
-        setResources((prev) => prev.filter((r) => r.id !== deleteConfirm.id))
+      if (deleteConfirm.type === 'draft' && deleteConfirm.draftType) {
+        const endpoint = deleteConfirm.draftType === 'resource' ? '/api/drafts/resources' : '/api/drafts/demands'
+        await apiDelete(`${endpoint}/${deleteConfirm.id}`, token)
+        if (deleteConfirm.draftType === 'resource') {
+          setResourceDrafts((prev) => prev.filter((d) => d.id !== deleteConfirm.id))
+        } else {
+          setDemandDrafts((prev) => prev.filter((d) => d.id !== deleteConfirm.id))
+        }
       } else {
-        setDemands((prev) => prev.filter((d) => d.id !== deleteConfirm.id))
+        const endpoint = deleteConfirm.type === 'resource' ? '/api/resources' : '/api/demands'
+        await apiDelete(`${endpoint}/${deleteConfirm.id}`, token)
+        if (deleteConfirm.type === 'resource') {
+          setResources((prev) => prev.filter((r) => r.id !== deleteConfirm.id))
+        } else {
+          setDemands((prev) => prev.filter((d) => d.id !== deleteConfirm.id))
+        }
       }
       setActionMsg(t('dashboard.deleted'))
       setTimeout(() => setActionMsg(''), 3000)
@@ -93,6 +130,7 @@ export default function DashboardPage() {
   const tabs: { key: Tab; label: string }[] = [
     { key: 'resources', label: t('dashboard.myResources') },
     { key: 'demands', label: t('dashboard.myDemands') },
+    { key: 'drafts', label: t('dashboard.drafts') },
     { key: 'recommendations', label: t('dashboard.aiRecommend') },
     { key: 'subscription', label: t('dashboard.subscription') },
   ]
@@ -244,6 +282,106 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {activeTab === 'drafts' && (
+              <div>
+                <div className="mb-8">
+                  <h2 className="text-xl font-semibold text-white mb-4">{t('dashboard.resourceDrafts')}</h2>
+                  {draftsLoading ? (
+                    <div className="glass rounded-xl p-8 text-center">
+                      <p className="text-gray-500">{t('dashboard.loading')}</p>
+                    </div>
+                  ) : resourceDrafts.length === 0 ? (
+                    <div className="glass rounded-xl p-8 text-center">
+                      <p className="text-gray-500">{t('dashboard.noDrafts')}</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {resourceDrafts.map((draft) => (
+                        <div key={draft.id} className="glass rounded-xl p-5">
+                          <div className="flex items-center gap-2 mb-2">
+                            {draft.category && (
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border ${getCategoryClass(draft.category)}`}>
+                                {draft.category}
+                              </span>
+                            )}
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                              {t('dashboard.draft')}
+                            </span>
+                          </div>
+                          <h3 className="text-sm font-medium text-white truncate">{draft.title || t('dashboard.noDrafts')}</h3>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {new Date(draft.updated_at).toLocaleDateString('zh-CN')}
+                          </p>
+                          <div className="mt-3 flex gap-2">
+                            <Link
+                              href={`/resources/publish`}
+                              className="text-xs text-cyan-400 hover:text-cyan-300"
+                            >
+                              {t('dashboard.edit')}
+                            </Link>
+                            <button
+                              onClick={() => setDeleteConfirm({ type: 'draft', id: draft.id, draftType: 'resource' })}
+                              className="text-xs text-red-400 hover:text-red-300"
+                            >
+                              {t('dashboard.delete')}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-semibold text-white mb-4">{t('dashboard.demandDrafts')}</h2>
+                  {draftsLoading ? (
+                    <div className="glass rounded-xl p-8 text-center">
+                      <p className="text-gray-500">{t('dashboard.loading')}</p>
+                    </div>
+                  ) : demandDrafts.length === 0 ? (
+                    <div className="glass rounded-xl p-8 text-center">
+                      <p className="text-gray-500">{t('dashboard.noDrafts')}</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {demandDrafts.map((draft) => (
+                        <div key={draft.id} className="glass rounded-xl p-5">
+                          <div className="flex items-center gap-2 mb-2">
+                            {draft.category && (
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium border ${getCategoryClass(draft.category)}`}>
+                                {draft.category}
+                              </span>
+                            )}
+                            <span className="px-2 py-0.5 rounded-full text-xs bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                              {t('dashboard.draft')}
+                            </span>
+                          </div>
+                          <h3 className="text-sm font-medium text-white truncate">{draft.title || t('dashboard.noDrafts')}</h3>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {new Date(draft.updated_at).toLocaleDateString('zh-CN')}
+                          </p>
+                          <div className="mt-3 flex gap-2">
+                            <Link
+                              href={`/demands/publish`}
+                              className="text-xs text-cyan-400 hover:text-cyan-300"
+                            >
+                              {t('dashboard.edit')}
+                            </Link>
+                            <button
+                              onClick={() => setDeleteConfirm({ type: 'draft', id: draft.id, draftType: 'demand' })}
+                              className="text-xs text-red-400 hover:text-red-300"
+                            >
+                              {t('dashboard.delete')}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

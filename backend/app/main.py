@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, demands, matching, resources, subscriptions
+from app.api import auth, demands, drafts, matching, messages, profiles, resources, subscriptions
 from app.core.config import settings
 from app.core.database import get_supabase_admin
 
@@ -20,6 +20,9 @@ app.include_router(resources.router)
 app.include_router(demands.router)
 app.include_router(matching.router)
 app.include_router(subscriptions.router)
+app.include_router(messages.router)
+app.include_router(drafts.router)
+app.include_router(profiles.router)
 
 
 @app.on_event("startup")

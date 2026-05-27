@@ -34,6 +34,11 @@ def list_resources(
             contact=r["contact"],
             country=r["country"],
             is_premium=r.get("is_premium", False),
+            industry=r.get("industry"),
+            tags=r.get("tags"),
+            budget=r.get("budget"),
+            quantity=r.get("quantity"),
+            image_urls=r.get("image_urls"),
             created_at=r["created_at"],
         )
         for r in result.data
@@ -54,6 +59,11 @@ def my_resources(current_user: dict = Depends(get_current_user)):
             contact=r["contact"],
             country=r["country"],
             is_premium=r.get("is_premium", False),
+            industry=r.get("industry"),
+            tags=r.get("tags"),
+            budget=r.get("budget"),
+            quantity=r.get("quantity"),
+            image_urls=r.get("image_urls"),
             created_at=r["created_at"],
         )
         for r in result.data
@@ -76,6 +86,11 @@ def get_resource(resource_id: str):
         contact=r["contact"],
         country=r["country"],
         is_premium=r.get("is_premium", False),
+        industry=r.get("industry"),
+        tags=r.get("tags"),
+        budget=r.get("budget"),
+        quantity=r.get("quantity"),
+        image_urls=r.get("image_urls"),
         created_at=r["created_at"],
     )
 
@@ -92,6 +107,16 @@ def create_resource(resource: ResourceCreate, current_user: dict = Depends(get_c
         "country": resource.country,
         "is_premium": False,
     }
+    if resource.industry:
+        new_resource["industry"] = resource.industry
+    if resource.tags:
+        new_resource["tags"] = resource.tags
+    if resource.budget:
+        new_resource["budget"] = resource.budget
+    if resource.quantity:
+        new_resource["quantity"] = resource.quantity
+    if resource.image_urls:
+        new_resource["image_urls"] = resource.image_urls
     result = supabase.table("resources").insert(new_resource).execute()
     if not result.data:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create resource")
@@ -105,6 +130,11 @@ def create_resource(resource: ResourceCreate, current_user: dict = Depends(get_c
         contact=r["contact"],
         country=r["country"],
         is_premium=r.get("is_premium", False),
+        industry=r.get("industry"),
+        tags=r.get("tags"),
+        budget=r.get("budget"),
+        quantity=r.get("quantity"),
+        image_urls=r.get("image_urls"),
         created_at=r["created_at"],
     )
 
@@ -126,6 +156,16 @@ def update_resource(resource_id: str, resource: ResourceUpdate, current_user: di
         update_data["contact"] = resource.contact
     if resource.country is not None:
         update_data["country"] = resource.country
+    if resource.industry is not None:
+        update_data["industry"] = resource.industry
+    if resource.tags is not None:
+        update_data["tags"] = resource.tags
+    if resource.budget is not None:
+        update_data["budget"] = resource.budget
+    if resource.quantity is not None:
+        update_data["quantity"] = resource.quantity
+    if resource.image_urls is not None:
+        update_data["image_urls"] = resource.image_urls
     result = supabase.table("resources").update(update_data).eq("id", resource_id).execute()
     r = result.data[0]
     return ResourceResponse(
@@ -137,6 +177,11 @@ def update_resource(resource_id: str, resource: ResourceUpdate, current_user: di
         contact=r["contact"],
         country=r["country"],
         is_premium=r.get("is_premium", False),
+        industry=r.get("industry"),
+        tags=r.get("tags"),
+        budget=r.get("budget"),
+        quantity=r.get("quantity"),
+        image_urls=r.get("image_urls"),
         created_at=r["created_at"],
     )
 

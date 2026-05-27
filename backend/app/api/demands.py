@@ -32,6 +32,11 @@ def list_demands(
             description=d["description"],
             category=d["category"],
             country=d["country"],
+            industry=d.get("industry"),
+            tags=d.get("tags"),
+            budget=d.get("budget"),
+            quantity=d.get("quantity"),
+            image_urls=d.get("image_urls"),
             created_at=d["created_at"],
         )
         for d in result.data
@@ -50,6 +55,11 @@ def my_demands(current_user: dict = Depends(get_current_user)):
             description=d["description"],
             category=d["category"],
             country=d["country"],
+            industry=d.get("industry"),
+            tags=d.get("tags"),
+            budget=d.get("budget"),
+            quantity=d.get("quantity"),
+            image_urls=d.get("image_urls"),
             created_at=d["created_at"],
         )
         for d in result.data
@@ -70,6 +80,11 @@ def get_demand(demand_id: str):
         description=d["description"],
         category=d["category"],
         country=d["country"],
+        industry=d.get("industry"),
+        tags=d.get("tags"),
+        budget=d.get("budget"),
+        quantity=d.get("quantity"),
+        image_urls=d.get("image_urls"),
         created_at=d["created_at"],
     )
 
@@ -84,6 +99,16 @@ def create_demand(demand: DemandCreate, current_user: dict = Depends(get_current
         "category": demand.category,
         "country": demand.country,
     }
+    if demand.industry:
+        new_demand["industry"] = demand.industry
+    if demand.tags:
+        new_demand["tags"] = demand.tags
+    if demand.budget:
+        new_demand["budget"] = demand.budget
+    if demand.quantity:
+        new_demand["quantity"] = demand.quantity
+    if demand.image_urls:
+        new_demand["image_urls"] = demand.image_urls
     result = supabase.table("demands").insert(new_demand).execute()
     if not result.data:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create demand")
@@ -95,6 +120,11 @@ def create_demand(demand: DemandCreate, current_user: dict = Depends(get_current
         description=d["description"],
         category=d["category"],
         country=d["country"],
+        industry=d.get("industry"),
+        tags=d.get("tags"),
+        budget=d.get("budget"),
+        quantity=d.get("quantity"),
+        image_urls=d.get("image_urls"),
         created_at=d["created_at"],
     )
 
@@ -114,6 +144,16 @@ def update_demand(demand_id: str, demand: DemandUpdate, current_user: dict = Dep
         update_data["category"] = demand.category
     if demand.country is not None:
         update_data["country"] = demand.country
+    if demand.industry is not None:
+        update_data["industry"] = demand.industry
+    if demand.tags is not None:
+        update_data["tags"] = demand.tags
+    if demand.budget is not None:
+        update_data["budget"] = demand.budget
+    if demand.quantity is not None:
+        update_data["quantity"] = demand.quantity
+    if demand.image_urls is not None:
+        update_data["image_urls"] = demand.image_urls
     result = supabase.table("demands").update(update_data).eq("id", demand_id).execute()
     d = result.data[0]
     return DemandResponse(
@@ -123,6 +163,11 @@ def update_demand(demand_id: str, demand: DemandUpdate, current_user: dict = Dep
         description=d["description"],
         category=d["category"],
         country=d["country"],
+        industry=d.get("industry"),
+        tags=d.get("tags"),
+        budget=d.get("budget"),
+        quantity=d.get("quantity"),
+        image_urls=d.get("image_urls"),
         created_at=d["created_at"],
     )
 

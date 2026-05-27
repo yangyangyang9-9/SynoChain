@@ -4,22 +4,44 @@ import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link, usePathname } from '@/i18n/routing'
 import { useAuthStore } from '@/store/authStore'
+import { apiGet } from '@/lib/api'
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher'
 
 export default function Navbar() {
   const t = useTranslations()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const { isAuthenticated, user, logout, loadFromStorage, fetchMe } = useAuthStore()
+  const [unreadCount, setUnreadCount] = useState(0)
+  const { isAuthenticated, user, token, logout, loadFromStorage, fetchMe } = useAuthStore()
   const pathname = usePathname()
 
   useEffect(() => {
     loadFromStorage()
-    const token = localStorage.getItem('token')
-    if (token) {
+    const storedToken = localStorage.getItem('token')
+    if (storedToken) {
       fetchMe()
     }
   }, [])
+
+  useEffect(() => {
+    if (!isAuthenticated || !token) {
+      setUnreadCount(0)
+      return
+    }
+
+    const fetchUnread = async () => {
+      try {
+        const data = await apiGet('/api/messages/unread-count', token)
+        setUnreadCount(data.count || data.unread_count || 0)
+      } catch {
+        setUnreadCount(0)
+      }
+    }
+
+    fetchUnread()
+    const interval = setInterval(fetchUnread, 30000)
+    return () => clearInterval(interval)
+  }, [isAuthenticated, token])
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10)
@@ -32,6 +54,7 @@ export default function Navbar() {
     { href: '/resources', label: t('nav.resources') },
     { href: '/demands', label: t('nav.demands') },
     { href: '/ai-recommendations', label: t('nav.aiRecommend') },
+    { href: '/messages', label: t('nav.messages') },
     { href: '/subscription', label: t('nav.subscription') },
   ]
 
@@ -81,13 +104,18 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm transition-colors duration-200 ${
+                className={`text-sm transition-colors duration-200 relative ${
                   pathname === link.href
                     ? 'text-cyan-400'
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
                 {link.label}
+                {link.href === '/messages' && unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-4 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </Link>
             ))}
           </div>
@@ -104,6 +132,12 @@ export default function Navbar() {
                   className="text-sm text-gray-300 hover:text-white transition-colors"
                 >
                   {t('nav.dashboard')}
+                </Link>
+                <Link
+                  href="/settings"
+                  className="text-sm text-gray-300 hover:text-white transition-colors"
+                >
+                  {t('nav.settings')}
                 </Link>
                 <span className="text-sm text-gray-500">{user?.email}</span>
                 <button
@@ -153,11 +187,16 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className={`text-sm py-2 transition-colors ${
+                  className={`text-sm py-2 transition-colors relative inline-flex items-center gap-2 ${
                     pathname === link.href ? 'text-cyan-400' : 'text-gray-400 hover:text-white'
                   }`}
                 >
                   {link.label}
+                  {link.href === '/messages' && unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
                 </Link>
               ))}
               <div className="py-2">
@@ -172,6 +211,13 @@ export default function Navbar() {
                       className="text-sm text-gray-300 hover:text-white"
                     >
                       {t('nav.dashboard')}
+                    </Link>
+                    <Link
+                      href="/settings"
+                      onClick={() => setMobileOpen(false)}
+                      className="text-sm text-gray-300 hover:text-white"
+                    >
+                      {t('nav.settings')}
                     </Link>
                     <button
                       onClick={() => { logout(); setMobileOpen(false) }}
