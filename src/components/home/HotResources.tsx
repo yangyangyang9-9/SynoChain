@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/routing'
 import { apiGet } from '@/lib/api'
 import { Resource, categoryColors, countryList } from '@/types'
 
 export default function HotResources() {
+  const t = useTranslations()
   const [resources, setResources] = useState<Resource[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -16,13 +18,13 @@ export default function HotResources() {
         const data = await apiGet('/api/resources?limit=6')
         setResources(Array.isArray(data) ? data : data.items || [])
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load resources')
+        setError(err instanceof Error ? err.message : t('common.error'))
       } finally {
         setLoading(false)
       }
     }
     fetchResources()
-  }, [])
+  }, [t])
 
   const getCountryInfo = (country: string) => {
     return countryList.find((c) => c.code === country || c.name === country)
@@ -37,7 +39,7 @@ export default function HotResources() {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">热门商业资源</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">{t('home.hotResources')}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -59,10 +61,10 @@ export default function HotResources() {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">热门商业资源</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">{t('home.hotResources')}</h2>
           </div>
           <div className="glass rounded-xl p-12 text-center">
-            <p className="text-gray-500">加载失败: {error}</p>
+            <p className="text-gray-500">{t('common.error')}: {error}</p>
           </div>
         </div>
       </section>
@@ -73,12 +75,12 @@ export default function HotResources() {
     <section className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-10">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white">热门商业资源</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white">{t('home.hotResources')}</h2>
           <Link
             href="/resources"
             className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1"
           >
-            查看全部
+            {t('home.viewAll')}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
@@ -87,9 +89,9 @@ export default function HotResources() {
 
         {resources.length === 0 ? (
           <div className="glass rounded-xl p-12 text-center">
-            <p className="text-gray-500">暂无资源数据</p>
+            <p className="text-gray-500">{t('resources.noResults')}</p>
             <Link href="/resources/publish" className="text-sm text-cyan-400 hover:text-cyan-300 mt-2 inline-block">
-              发布第一个资源
+              {t('resources.publish')}
             </Link>
           </div>
         ) : (
@@ -99,7 +101,7 @@ export default function HotResources() {
               return (
                 <Link
                   key={resource.id}
-                  href={`/resources`}
+                  href="/resources"
                   className="glass rounded-xl p-6 hover:border-cyan-500/30 hover:bg-white/[0.04] transition-all group"
                 >
                   <span
@@ -118,7 +120,7 @@ export default function HotResources() {
                       {countryInfo ? `${countryInfo.flag} ${countryInfo.name}` : resource.country}
                     </span>
                     <span className="text-sm text-cyan-400 group-hover:translate-x-1 transition-transform">
-                      查看详情 &rarr;
+                      {t('resources.details')} &rarr;
                     </span>
                   </div>
                 </Link>

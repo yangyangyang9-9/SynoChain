@@ -1,6 +1,11 @@
-import Link from 'next/link'
+'use client'
+
+import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/routing'
 
 export default function Footer() {
+  const t = useTranslations()
+
   return (
     <footer className="border-t border-white/5 bg-[#0a0a0f]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -23,36 +28,36 @@ export default function Footer() {
               <span className="text-lg font-bold gradient-text">SynoChain AI</span>
             </div>
             <p className="text-sm text-gray-500 leading-relaxed">
-              全球AI商业连接平台
+              {t('footer.tagline')}
             </p>
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold text-white mb-4">快速链接</h4>
+            <h4 className="text-sm font-semibold text-white mb-4">{t('footer.quickLinks')}</h4>
             <div className="grid grid-cols-2 gap-2">
               <Link href="/" className="text-sm text-gray-500 hover:text-cyan-400 transition-colors">
-                关于我们
+                {t('footer.about')}
               </Link>
               <Link href="/resources" className="text-sm text-gray-500 hover:text-cyan-400 transition-colors">
-                全球资源
+                {t('nav.resources')}
               </Link>
               <Link href="/demands" className="text-sm text-gray-500 hover:text-cyan-400 transition-colors">
-                全球需求
+                {t('nav.demands')}
               </Link>
               <Link href="/ai-recommendations" className="text-sm text-gray-500 hover:text-cyan-400 transition-colors">
-                AI推荐
+                {t('nav.aiRecommend')}
               </Link>
               <Link href="/subscription" className="text-sm text-gray-500 hover:text-cyan-400 transition-colors">
-                订阅服务
+                {t('nav.subscription')}
               </Link>
-              <Link href="mailto:support@synochain.ai" className="text-sm text-gray-500 hover:text-cyan-400 transition-colors">
-                联系方式
-              </Link>
+              <a href="mailto:support@synochain.ai" className="text-sm text-gray-500 hover:text-cyan-400 transition-colors">
+                {t('footer.contact')}
+              </a>
             </div>
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold text-white mb-4">联系我们</h4>
+            <h4 className="text-sm font-semibold text-white mb-4">{t('footer.contactUs')}</h4>
             <a
               href="mailto:support@synochain.ai"
               className="text-sm text-gray-500 hover:text-cyan-400 transition-colors"
@@ -64,7 +69,7 @@ export default function Footer() {
 
         <div className="mt-10 pt-6 border-t border-white/5 text-center">
           <p className="text-xs text-gray-600">
-            &copy; 2026 SynoChain AI. All rights reserved.
+            {t('footer.copyright')}
           </p>
         </div>
       </div>

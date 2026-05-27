@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { Link, useRouter } from '@/i18n/routing'
 import { useForm } from 'react-hook-form'
 import { useAuthStore } from '@/store/authStore'
 
@@ -12,6 +12,7 @@ interface LoginFormData {
 }
 
 export default function LoginPage() {
+  const t = useTranslations()
   const router = useRouter()
   const [serverError, setServerError] = useState('')
   const { login } = useAuthStore()
@@ -28,7 +29,7 @@ export default function LoginPage() {
       await login(data.email, data.password)
       router.push('/dashboard')
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : '登录失败，请重试')
+      setServerError(err instanceof Error ? err.message : t('common.error'))
     }
   }
 
@@ -37,8 +38,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="glass rounded-2xl p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold gradient-text">登录 SynoChain AI</h1>
-            <p className="text-sm text-gray-500 mt-2">欢迎回来，请登录您的账号</p>
+            <h1 className="text-2xl font-bold gradient-text">{t('auth.loginTitle')}</h1>
+            <p className="text-sm text-gray-500 mt-2">{t('auth.loginTitle')}</p>
           </div>
 
           {serverError && (
@@ -50,15 +51,15 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">
-                邮箱地址
+                {t('auth.email')}
               </label>
               <input
                 type="email"
                 {...register('email', {
-                  required: '请输入邮箱地址',
+                  required: t('auth.emailRequired'),
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: '请输入有效的邮箱地址',
+                    message: t('auth.emailInvalid'),
                   },
                 })}
                 placeholder="your@email.com"
@@ -71,18 +72,18 @@ export default function LoginPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">
-                密码
+                {t('auth.password')}
               </label>
               <input
                 type="password"
                 {...register('password', {
-                  required: '请输入密码',
+                  required: t('auth.passwordRequired'),
                   minLength: {
                     value: 6,
-                    message: '密码至少需要6个字符',
+                    message: t('auth.passwordMin'),
                   },
                 })}
-                placeholder="请输入密码"
+                placeholder={t('auth.password')}
                 className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30 transition-all"
               />
               {errors.password && (
@@ -95,15 +96,15 @@ export default function LoginPage() {
               disabled={isSubmitting}
               className="w-full py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 transition-all shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? '登录中...' : '登录'}
+              {isSubmitting ? t('common.loading') : t('auth.loginBtn')}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
-              还没有账号？{' '}
+              {t('auth.noAccount')}{' '}
               <Link href="/register" className="text-cyan-400 hover:text-cyan-300 transition-colors">
-                立即注册
+                {t('auth.toRegister')}
               </Link>
             </p>
           </div>

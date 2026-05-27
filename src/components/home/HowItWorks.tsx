@@ -1,9 +1,13 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
+
 export default function HowItWorks() {
+  const t = useTranslations()
+
   const steps = [
     {
       number: '01',
-      title: '发布资源/需求',
-      description: '发布您的商业资源或采购需求',
       icon: (
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -13,8 +17,6 @@ export default function HowItWorks() {
     },
     {
       number: '02',
-      title: 'AI 智能匹配',
-      description: 'AI 自动分析并匹配最佳合作方',
       icon: (
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
@@ -26,8 +28,6 @@ export default function HowItWorks() {
     },
     {
       number: '03',
-      title: '全球连接',
-      description: '获得专业推荐，拓展全球商业网络',
       icon: (
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
@@ -44,7 +44,7 @@ export default function HowItWorks() {
         <div className="text-center mb-16">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
             SynoChain AI{' '}
-            <span className="gradient-text">如何运作</span>
+            <span className="gradient-text">{t('home.howItWorks')}</span>
           </h2>
         </div>
 
@@ -61,8 +61,8 @@ export default function HowItWorks() {
                   <div className="text-4xl font-bold text-white/5 absolute top-4 right-6">
                     {step.number}
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">{step.description}</p>
+                  <h3 className="text-xl font-semibold text-white mb-3">{t(`home.step${index + 1}Title`)}</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">{t(`home.step${index + 1}Desc`)}</p>
                 </div>
               </div>
             ))}

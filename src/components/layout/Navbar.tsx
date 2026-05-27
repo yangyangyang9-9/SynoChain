@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { Link, usePathname } from '@/i18n/routing'
 import { useAuthStore } from '@/store/authStore'
-import { usePathname } from 'next/navigation'
+import LanguageSwitcher from '@/components/layout/LanguageSwitcher'
 
 export default function Navbar() {
+  const t = useTranslations()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { isAuthenticated, user, logout, loadFromStorage, fetchMe } = useAuthStore()
@@ -26,11 +28,11 @@ export default function Navbar() {
   }, [])
 
   const navLinks = [
-    { href: '/', label: '首页' },
-    { href: '/resources', label: '全球资源' },
-    { href: '/demands', label: '全球需求' },
-    { href: '/ai-recommendations', label: 'AI推荐' },
-    { href: '/subscription', label: '订阅服务' },
+    { href: '/', label: t('nav.home') },
+    { href: '/resources', label: t('nav.resources') },
+    { href: '/demands', label: t('nav.demands') },
+    { href: '/ai-recommendations', label: t('nav.aiRecommend') },
+    { href: '/subscription', label: t('nav.subscription') },
   ]
 
   return (
@@ -91,20 +93,24 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitcher />
+          </div>
+
+          <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <>
                 <Link
                   href="/dashboard"
                   className="text-sm text-gray-300 hover:text-white transition-colors"
                 >
-                  后台
+                  {t('nav.dashboard')}
                 </Link>
                 <span className="text-sm text-gray-500">{user?.email}</span>
                 <button
                   onClick={logout}
                   className="text-sm text-gray-400 hover:text-red-400 transition-colors"
                 >
-                  退出
+                  {t('nav.logout')}
                 </button>
               </>
             ) : (
@@ -113,13 +119,13 @@ export default function Navbar() {
                   href="/login"
                   className="text-sm text-gray-300 hover:text-white transition-colors"
                 >
-                  登录
+                  {t('nav.login')}
                 </Link>
                 <Link
                   href="/register"
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 transition-all shadow-lg shadow-cyan-500/25"
                 >
-                  注册
+                  {t('nav.register')}
                 </Link>
               </>
             )}
@@ -154,7 +160,10 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <div className="border-t border-white/5 pt-3 mt-1">
+              <div className="py-2">
+                <LanguageSwitcher />
+              </div>
+              <div className="border-t border-white/5 pt-3">
                 {isAuthenticated ? (
                   <div className="flex flex-col gap-2">
                     <Link
@@ -162,13 +171,13 @@ export default function Navbar() {
                       onClick={() => setMobileOpen(false)}
                       className="text-sm text-gray-300 hover:text-white"
                     >
-                      后台
+                      {t('nav.dashboard')}
                     </Link>
                     <button
                       onClick={() => { logout(); setMobileOpen(false) }}
                       className="text-sm text-left text-red-400 hover:text-red-300"
                     >
-                      退出
+                      {t('nav.logout')}
                     </button>
                   </div>
                 ) : (
@@ -178,14 +187,14 @@ export default function Navbar() {
                       onClick={() => setMobileOpen(false)}
                       className="text-sm text-gray-300 hover:text-white"
                     >
-                      登录
+                      {t('nav.login')}
                     </Link>
                     <Link
                       href="/register"
                       onClick={() => setMobileOpen(false)}
                       className="px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
                     >
-                      注册
+                      {t('nav.register')}
                     </Link>
                   </div>
                 )}

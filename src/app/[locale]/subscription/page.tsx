@@ -1,27 +1,11 @@
 'use client'
 
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/routing'
 import { useAuthStore } from '@/store/authStore'
 
-const freeFeatures = [
-  '基础资源发布',
-  '基础需求发布',
-  '有限 AI 匹配',
-  '基础搜索筛选',
-]
-
-const premiumFeatures = [
-  '所有免费版功能',
-  '5,000+ 优质供应链数据访问',
-  '优先 AI 智能匹配',
-  '全球供应商直连',
-  '优先推荐展示',
-  '高级数据分析',
-  '专属客服支持',
-  '无限制资源/需求发布',
-]
-
 export default function SubscriptionPage() {
+  const t = useTranslations()
   const { isAuthenticated, user } = useAuthStore()
 
   return (
@@ -29,28 +13,28 @@ export default function SubscriptionPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-            <span className="gradient-text-amber">解锁 5,000+ 优质供应链资源</span>
+            <span className="gradient-text-amber">{t('subscriptionPage.title')}</span>
           </h1>
           <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            选择最适合您的方案，开启全球商业连接之旅
+            {t('home.subscriptionSubtitle')}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           <div className="glass rounded-2xl p-8">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-white mb-2">免费版</h2>
-              <p className="text-4xl font-bold gradient-text">免费</p>
-              <p className="text-sm text-gray-500 mt-1">适合刚开始探索的用户</p>
+              <h2 className="text-2xl font-bold text-white mb-2">{t('subscriptionPage.free')}</h2>
+              <p className="text-4xl font-bold gradient-text">{t('subscriptionPage.free')}</p>
+              <p className="text-sm text-gray-500 mt-1">{t('subscriptionPage.free')}</p>
             </div>
 
             <div className="space-y-3 mb-8">
-              {freeFeatures.map((feature, i) => (
+              {[0, 1, 2, 3].map((i) => (
                 <div key={i} className="flex items-center gap-3">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-500 flex-shrink-0">
                     <path d="M20 6L9 17l-5-5" />
                   </svg>
-                  <span className="text-sm text-gray-400">{feature}</span>
+                  <span className="text-sm text-gray-400">{t(`subscriptionPage.freeFeatures.${i}`)}</span>
                 </div>
               ))}
             </div>
@@ -59,28 +43,28 @@ export default function SubscriptionPage() {
               href="/register"
               className="block w-full py-3 rounded-xl text-sm font-medium text-center border border-white/10 text-white hover:bg-white/5 transition-colors"
             >
-              {isAuthenticated ? '您当前正在使用此方案' : '免费开始'}
+              {isAuthenticated ? t('subscriptionPage.free') : t('subscriptionPage.free')}
             </Link>
           </div>
 
           <div className="gradient-border rounded-2xl bg-[#1a1a2e] p-8 relative overflow-hidden">
             <div className="absolute top-0 right-0 px-4 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium rounded-bl-xl">
-              推荐
+              {t('subscriptionPage.premium')}
             </div>
 
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-white mb-2">Premium</h2>
-              <p className="text-4xl font-bold gradient-text-amber">$29.99</p>
-              <p className="text-sm text-gray-500 mt-1">每月订阅 · 可随时取消</p>
+              <h2 className="text-2xl font-bold text-white mb-2">{t('subscriptionPage.premium')}</h2>
+              <p className="text-4xl font-bold gradient-text-amber">{t('subscriptionPage.price')}</p>
+              <p className="text-sm text-gray-500 mt-1">{t('subscriptionPage.free')}</p>
             </div>
 
             <div className="space-y-3 mb-8">
-              {premiumFeatures.map((feature, i) => (
+              {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
                 <div key={i} className="flex items-center gap-3">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-amber-400 flex-shrink-0">
                     <path d="M20 6L9 17l-5-5" />
                   </svg>
-                  <span className="text-sm text-gray-300">{feature}</span>
+                  <span className="text-sm text-gray-300">{t(`subscriptionPage.premiumFeatures.${i}`)}</span>
                 </div>
               ))}
             </div>
@@ -88,15 +72,15 @@ export default function SubscriptionPage() {
             <button
               className="block w-full py-3 rounded-xl text-sm font-semibold text-center bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-400 hover:to-orange-400 transition-all shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40"
             >
-              {user?.is_subscribed ? '已订阅 · 管理订阅' : '立即订阅'}
+              {user?.is_subscribed ? t('subscriptionPage.subscribeBtn') : t('subscriptionPage.subscribeBtn')}
             </button>
           </div>
         </div>
 
         <div className="max-w-2xl mx-auto mt-16 p-8 glass rounded-2xl">
-          <h3 className="text-lg font-semibold text-white mb-4">支付方式</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">{t('subscriptionPage.paymentInfo')}</h3>
           <p className="text-sm text-gray-400 mb-4">
-            我们支持以下支付方式完成订阅。订阅后将立即解锁所有 Premium 功能。
+            {t('subscriptionPage.paymentInfo')}
           </p>
           <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
             <div className="flex items-center gap-3 mb-2">
@@ -108,12 +92,12 @@ export default function SubscriptionPage() {
               </div>
               <div>
                 <p className="text-sm text-white font-medium">PayPal</p>
-                <p className="text-xs text-gray-500">payments@synochain.ai</p>
+                <p className="text-xs text-gray-500">{t('subscriptionPage.paypalEmail')}</p>
               </div>
             </div>
           </div>
           <p className="mt-4 text-xs text-gray-600">
-            如需发票或其他支付方式，请联系 support@synochain.ai
+            {t('footer.contactUs')}
           </p>
         </div>
       </div>

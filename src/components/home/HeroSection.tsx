@@ -1,8 +1,11 @@
 'use client'
 
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/routing'
 
 export default function HeroSection() {
+  const t = useTranslations()
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       <div className="absolute inset-0 hero-grid" />
@@ -14,11 +17,11 @@ export default function HeroSection() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="animate-fade-in">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-            <span className="gradient-text">AI 驱动的全球商业连接平台</span>
+            <span className="gradient-text">{t('hero.title')}</span>
           </h1>
 
           <p className="mt-6 text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-            发布资源与需求，让 AI 自动匹配全球商业机会。覆盖 5000+ 优质供应链，涵盖所有行业。
+            {t('hero.subtitle')}
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -26,28 +29,28 @@ export default function HeroSection() {
               href="/register"
               className="px-8 py-3.5 rounded-xl text-base font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 transition-all shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-105"
             >
-              立即开始
+              {t('hero.cta1')}
             </Link>
             <Link
               href="#how-it-works"
               className="px-8 py-3.5 rounded-xl text-base font-semibold border border-white/20 text-white hover:bg-white/5 transition-all"
             >
-              了解更多
+              {t('hero.cta2')}
             </Link>
           </div>
 
           <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl mx-auto">
             <div className="glass-light rounded-xl p-6 text-center">
               <div className="text-3xl font-bold gradient-text mb-1">10,000+</div>
-              <div className="text-sm text-gray-500">商业资源</div>
+              <div className="text-sm text-gray-500">{t('hero.stats.resources')}</div>
             </div>
             <div className="glass-light rounded-xl p-6 text-center">
               <div className="text-3xl font-bold gradient-text mb-1">5,000+</div>
-              <div className="text-sm text-gray-500">优质供应链</div>
+              <div className="text-sm text-gray-500">{t('hero.stats.supplyChain')}</div>
             </div>
             <div className="glass-light rounded-xl p-6 text-center">
               <div className="text-3xl font-bold gradient-text mb-1">200+</div>
-              <div className="text-sm text-gray-500">覆盖行业</div>
+              <div className="text-sm text-gray-500">{t('hero.stats.industries')}</div>
             </div>
           </div>
         </div>

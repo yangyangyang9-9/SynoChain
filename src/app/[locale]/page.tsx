@@ -1,3 +1,5 @@
+'use client'
+
 import HeroSection from '@/components/home/HeroSection'
 import HotResources from '@/components/home/HotResources'
 import HotDemands from '@/components/home/HotDemands'
