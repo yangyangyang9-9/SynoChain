@@ -128,10 +128,14 @@
     "confirmDeleteDesc": "此操作不可恢复",
     "cancel": "取消",
     "confirm": "确认",
+    "deleted": "删除成功",
+    "updated": "更新成功",
     "editResource": "编辑资源",
     "editDemand": "编辑需求",
     "save": "保存",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "deleted": "删除成功",
+    "updated": "更新成功"
   },
   "subscriptionPage": {
     "title": "解锁 5,000+ 优质供应链资源",

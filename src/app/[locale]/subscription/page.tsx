@@ -24,8 +24,8 @@ export default function SubscriptionPage() {
           <div className="glass rounded-2xl p-8">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-white mb-2">{t('subscriptionPage.free')}</h2>
-              <p className="text-4xl font-bold gradient-text">{t('subscriptionPage.free')}</p>
-              <p className="text-sm text-gray-500 mt-1">{t('subscriptionPage.free')}</p>
+              <p className="text-4xl font-bold gradient-text">$0</p>
+              <p className="text-sm text-gray-500 mt-1">/month</p>
             </div>
 
             <div className="space-y-3 mb-8">
@@ -55,7 +55,7 @@ export default function SubscriptionPage() {
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-white mb-2">{t('subscriptionPage.premium')}</h2>
               <p className="text-4xl font-bold gradient-text-amber">{t('subscriptionPage.price')}</p>
-              <p className="text-sm text-gray-500 mt-1">{t('subscriptionPage.free')}</p>
+              <p className="text-sm text-gray-500 mt-1">/month</p>
             </div>
 
             <div className="space-y-3 mb-8">

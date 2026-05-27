@@ -19,35 +19,17 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
 
   login: async (email: string, password: string) => {
-    const data = new URLSearchParams()
-    data.append('username', email)
-    data.append('password', password)
+    const result = await apiPost('/api/auth/login', { email, password })
 
-    const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-    const response = await fetch(`${baseURL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: data,
-    })
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: 'Login failed' }))
-      throw new Error(error.detail || 'Login failed')
+    if (!result.access_token) {
+      throw new Error('Login failed: no token received')
     }
 
-    const result = await response.json()
     const token = result.access_token
     localStorage.setItem('token', token)
 
-    const userResponse = await fetch(`${baseURL}/api/users/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    const user = await apiGet('/api/auth/me', token)
 
-    if (!userResponse.ok) {
-      throw new Error('Failed to fetch user')
-    }
-
-    const user = await userResponse.json()
     set({ user, token, isAuthenticated: true })
   },
 
@@ -65,7 +47,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (!token) return
 
     try {
-      const user = await apiGet('/api/users/me', token)
+      const user = await apiGet('/api/auth/me', token)
       set({ user, token, isAuthenticated: true })
     } catch {
       localStorage.removeItem('token')

@@ -64,7 +64,7 @@ export default function DashboardPage() {
       } else {
         setDemands((prev) => prev.filter((d) => d.id !== deleteConfirm.id))
       }
-      setActionMsg(t('dashboard.delete'))
+      setActionMsg(t('dashboard.deleted'))
       setTimeout(() => setActionMsg(''), 3000)
     } catch (err) {
       setActionMsg(err instanceof Error ? err.message : t('common.error'))
@@ -406,7 +406,7 @@ function EditModal({ type, id, token, onClose, onSuccess }: {
     const endpoint = type === 'resource' ? '/api/resources' : '/api/demands'
     try {
       await apiPut(`${endpoint}/${id}`, data, token)
-      onSuccess(t('dashboard.save'))
+      onSuccess(t('dashboard.updated'))
     } catch (err) {
       setServerError(err instanceof Error ? err.message : t('common.error'))
     }

@@ -128,6 +128,8 @@
     "confirmDeleteDesc": "This action cannot be undone",
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "deleted": "Deleted successfully",
+    "updated": "Updated successfully",
     "editResource": "Edit Resource",
     "editDemand": "Edit Demand",
     "save": "Save",
