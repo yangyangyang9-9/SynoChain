@@ -1,0 +1,193 @@
+'use client'
+
+import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
+import { apiGet } from '@/lib/api'
+import { useAuthStore } from '@/store/authStore'
+import { Demand, categoryColors, countryList, demandCategories } from '@/types'
+
+export default function DemandsPage() {
+  const [demands, setDemands] = useState<Demand[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('')
+  const [country, setCountry] = useState('')
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const { isAuthenticated } = useAuthStore()
+
+  const fetchDemands = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const params: Record<string, string> = { page: String(page), limit: '12' }
+      if (search) params.search = search
+      if (category) params.category = category
+      if (country) params.country = country
+      const query = '?' + new URLSearchParams(params).toString()
+      const data = await apiGet(`/api/demands${query}`)
+      setDemands(Array.isArray(data) ? data : data.items || [])
+      setTotalPages(data.total_pages || Math.ceil((data.total || 0) / 12) || 1)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load demands')
+    } finally {
+      setLoading(false)
+    }
+  }, [search, category, country, page])
+
+  useEffect(() => {
+    fetchDemands()
+  }, [fetchDemands])
+
+  const getCountryInfo = (countryName: string) => {
+    return countryList.find((c) => c.code === countryName || c.name === countryName)
+  }
+
+  const getCategoryClass = (cat: string) => {
+    return categoryColors[cat] || categoryColors['其他']
+  }
+
+  return (
+    <div className="min-h-screen pt-24 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-white">全球商业需求</h1>
+          {isAuthenticated && (
+            <Link
+              href="/demands/publish"
+              className="px-5 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 transition-all shadow-lg shadow-cyan-500/25"
+            >
+              + 发布需求
+            </Link>
+          )}
+        </div>
+
+        <div className="glass rounded-xl p-4 mb-8 flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+            placeholder="搜索需求..."
+            className="flex-1 px-4 py-2.5 rounded-lg bg-white/[0.05] border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 text-sm"
+          />
+          <select
+            value={category}
+            onChange={(e) => { setCategory(e.target.value); setPage(1) }}
+            className="px-4 py-2.5 rounded-lg bg-white/[0.05] border border-white/10 text-gray-300 text-sm focus:outline-none focus:border-cyan-500/50"
+          >
+            <option value="">所有分类</option>
+            {demandCategories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+          <select
+            value={country}
+            onChange={(e) => { setCountry(e.target.value); setPage(1) }}
+            className="px-4 py-2.5 rounded-lg bg-white/[0.05] border border-white/10 text-gray-300 text-sm focus:outline-none focus:border-cyan-500/50"
+          >
+            <option value="">所有国家</option>
+            {countryList.map((c) => (
+              <option key={c.code} value={c.name}>{c.flag} {c.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="glass rounded-xl p-6 animate-pulse">
+                <div className="h-5 bg-white/5 rounded w-16 mb-4" />
+                <div className="h-6 bg-white/5 rounded w-3/4 mb-3" />
+                <div className="h-4 bg-white/5 rounded w-full mb-2" />
+                <div className="h-4 bg-white/5 rounded w-2/3" />
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="glass rounded-xl p-12 text-center">
+            <p className="text-red-400 mb-4">{error}</p>
+            <button
+              onClick={fetchDemands}
+              className="px-4 py-2 rounded-lg text-sm bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 transition-colors"
+            >
+              重试
+            </button>
+          </div>
+        ) : demands.length === 0 ? (
+          <div className="glass rounded-xl p-12 text-center">
+            <p className="text-gray-500">暂无需求数据</p>
+            {isAuthenticated && (
+              <Link href="/demands/publish" className="text-sm text-cyan-400 hover:text-cyan-300 mt-2 inline-block">
+                发布第一个需求
+              </Link>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {demands.map((demand) => {
+                const countryInfo = getCountryInfo(demand.country)
+                return (
+                  <div
+                    key={demand.id}
+                    className="glass rounded-xl p-6 hover:border-cyan-500/30 hover:bg-white/[0.04] transition-all group"
+                  >
+                    <span
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${getCategoryClass(demand.category)}`}
+                    >
+                      {demand.category}
+                    </span>
+                    <h3 className="mt-4 text-lg font-semibold text-white group-hover:text-cyan-400 transition-colors line-clamp-1">
+                      {demand.title}
+                    </h3>
+                    <p className="mt-2 text-sm text-gray-400 line-clamp-2 leading-relaxed">
+                      {demand.description}
+                    </p>
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-sm text-gray-500">
+                        {countryInfo ? `${countryInfo.flag} ${countryInfo.name}` : demand.country}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-10">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 rounded-lg text-sm border border-white/10 text-gray-400 hover:text-white hover:border-white/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  上一页
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`w-10 h-10 rounded-lg text-sm transition-colors ${
+                      p === page
+                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                        : 'border border-white/10 text-gray-400 hover:text-white hover:border-white/20'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="px-4 py-2 rounded-lg text-sm border border-white/10 text-gray-400 hover:text-white hover:border-white/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  下一页
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
