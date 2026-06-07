@@ -13,13 +13,13 @@ export interface CalculationResult {
 function getCurrentLunarMonth(): number {
   const now = new Date()
   const gregorianMonth = now.getMonth() + 1
-  return ((gregorianMonth + 1) % 12) + 1
+  return ((gregorianMonth - 2 + 12) % 12) || 12
 }
 
 function getGregorianEstimate(lunarMonth: number): string {
   const now = new Date()
   const currentYear = now.getFullYear()
-  const gregorianMonth = ((lunarMonth + 1) % 12) || 12
+  const gregorianMonth = ((lunarMonth + 2) % 12) || 12
 
   const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
 
@@ -33,7 +33,9 @@ function getGregorianEstimate(lunarMonth: number): string {
 
 function getCircularDistance(from: number, to: number): number {
   let d = to - from
-  if (d <= 0) d += 12
+  if (d < 0) d += 12
+  // 当月时间太近，不利于用户备孕，排到最后
+  if (d === 0) d = 12
   return d
 }
 
@@ -64,7 +66,7 @@ export function calculateBoyMonths(birthYear: number): CalculationResult {
   const suitableMonths = boyMonths.filter(m => m.isBoy)
   suitableMonths.sort((a, b) => a.distance - b.distance)
 
-  const results = suitableMonths.slice(0, 3)
+  const results = suitableMonths.slice(0, 2)
 
   return {
     age,
