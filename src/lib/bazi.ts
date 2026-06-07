@@ -1,37 +1,36 @@
-const _K = [0x10, 0x09, 0x0b, 0x0d, 0x13, 0x0a, 0x0c, 0x0e, 0x12, 0x0f, 0x15, 0x11]
-const _S = [0x27, 0x2e, 0x2c, 0x3a, 0x2b, 0x2f, 0x3d, 0x29, 0x3e, 0x28, 0x3b, 0x2d, 0x3c, 0x3f, 0x30, 0x31]
+const _X = [0x31, 0x13, 0x0d, 0x0b, 0x11, 0x0f, 0x0a, 0x0e, 0x12, 0x09, 0x15, 0x10]
+const _Y = [0x2d, 0x3c, 0x3a, 0x3f, 0x2e, 0x3b, 0x29, 0x3d, 0x3e, 0x2c, 0x28, 0x30, 0x31, 0x2b, 0x2f, 0x27]
 
-function _d(k: number): number {
-  let r = 0
-  for (let i = 0; i < _K.length; i++) {
-    r += (_K[i] ^ (_S[i % _S.length] & 0x1f)) * (k & 0x1)
-    k = k >> 1
+function _r(s: number): number {
+  let v = 0
+  for (let i = 0; i < _X.length; i++) {
+    v += (_X[i] ^ (_Y[i % _Y.length] & 0x1f)) * (s & 0x1)
+    s = s >> 1
   }
-  return r & 0xff
+  return v & 0xff
 }
 
-function _e(v: number): number {
-  return ((v ^ _d(0x7a3e)) * _d(0x5f1c)) % _d(0x9b4d)
+function _w(a: number): number {
+  return ((a ^ _r(0x7a3e)) * _r(0x5f1c)) % _r(0x9b4d)
 }
 
-function _g(a: number, b: number): number {
-  return ((a + _d(0x3e8)) % _d(0x4e20)) + b
+function _t(a: number, m: number): number {
+  const c = _r(0x31)
+  const d = _r(0x13)
+  return a + m + c + d
 }
 
-function _h(a: number, b: number): boolean {
-  const x = _g(a, b)
-  const y = _e(x)
-  return (y & 0x1) === 0x1
-}
-
-function _f(a: number, b: number): number {
-  return (_g(a, b) + _d(0x2a)) & 0xffff
+function _b(a: number, m: number): boolean {
+  const s = _t(a, m)
+  const x = _w(s)
+  return (x & 0x1) === 0x1
 }
 
 export interface BoyMonthResult {
   month: string
   lunarMonth: number
   isBoy: boolean
+  distance: number
 }
 
 export interface CalculationResult {
@@ -39,58 +38,62 @@ export interface CalculationResult {
   results: BoyMonthResult[]
 }
 
-function lunarMonthToName(lunarMonth: number): string {
-  const names = ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '腊月']
-  return names[(lunarMonth - 1 + 12) % 12]
+function getCurrentLunarMonth(): number {
+  const now = new Date()
+  const gregorianMonth = now.getMonth() + 1
+  return ((gregorianMonth + 1) % 12) + 1
 }
 
-function getGregorianDateFromLunarMonth(lunarMonth: number): string {
+function getGregorianEstimate(lunarMonth: number): string {
   const now = new Date()
   const currentYear = now.getFullYear()
-
-  const lunarBase = lunarMonth - 1
-  let gregorianMonth = lunarBase
-
-  if (lunarBase <= 2) {
-    gregorianMonth = lunarBase + 10
-  } else {
-    gregorianMonth = lunarBase - 2
-  }
+  const gregorianMonth = ((lunarMonth + 1) % 12) || 12
 
   const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-  let targetYear = gregorianMonth >= 10 ? currentYear - 1 : currentYear
-  if (gregorianMonth >= 12) {
-    gregorianMonth -= 12
-    targetYear += 1
+
+  let targetYear = currentYear
+  if (gregorianMonth < now.getMonth() + 1) {
+    targetYear = currentYear + 1
   }
 
-  return `${targetYear}年${monthNames[gregorianMonth]}`
+  return `${targetYear}年${monthNames[gregorianMonth - 1]}`
+}
+
+function getCircularDistance(from: number, to: number): number {
+  let d = to - from
+  if (d <= 0) d += 12
+  return d
 }
 
 export function calculateBoyMonths(birthYear: number): CalculationResult {
   const now = new Date()
   const currentYear = now.getFullYear()
   const age = currentYear - birthYear
+  const currentLunarMonth = getCurrentLunarMonth()
 
   const boyMonths: BoyMonthResult[] = []
 
   for (let lunarMonth = 1; lunarMonth <= 12; lunarMonth++) {
-    const isBoy = _h(age, lunarMonth)
-    const gregorianDate = getGregorianDateFromLunarMonth(lunarMonth)
+    const isBoy = _b(age, lunarMonth)
+    const gregorianDate = getGregorianEstimate(lunarMonth)
+    const distance = getCircularDistance(currentLunarMonth, lunarMonth)
 
     boyMonths.push({
       month: gregorianDate,
       lunarMonth,
       isBoy,
+      distance,
     })
   }
 
-  const boyResults = boyMonths.filter(m => m.isBoy)
-  const sortedResults = boyResults.slice(0, 3)
+  const suitableMonths = boyMonths.filter(m => m.isBoy)
+  suitableMonths.sort((a, b) => a.distance - b.distance)
+
+  const results = suitableMonths.slice(1, 3)
 
   return {
     age,
-    results: sortedResults,
+    results,
   }
 }
 

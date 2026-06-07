@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Loader2, X, AlertTriangle, Mail, Calendar, Star } from 'lucide-react'
+import { ArrowLeft, Loader2, X, Mail, Calendar, Star } from 'lucide-react'
 import Link from 'next/link'
 import { PREREQUISITES, BoyMonthResult } from '@/lib/bazi'
 
@@ -27,7 +27,6 @@ export default function OrderPage() {
     age: number
     results: BoyMonthResult[]
   } | null>(null)
-  const [showPrerequisites, setShowPrerequisites] = useState(false)
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {}
@@ -44,11 +43,6 @@ export default function OrderPage() {
     e.preventDefault()
     if (!validate()) return
 
-    setShowPrerequisites(true)
-  }
-
-  const handleConfirmPrerequisites = async () => {
-    setShowPrerequisites(false)
     setLoading(true)
     try {
       const res = await fetch('/api/calculate', {
@@ -177,82 +171,6 @@ export default function OrderPage() {
       </div>
 
       <AnimatePresence>
-        {showPrerequisites && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
-            onClick={() => setShowPrerequisites(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: 'spring', duration: 0.4 }}
-              className="bg-[#111] border border-[#c9a96e] rounded-2xl p-6 md:p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-[#c9a96e]" />
-                  <h2 className="text-xl font-serif text-[#c9a96e]">重要前提条件</h2>
-                </div>
-                <button
-                  onClick={() => setShowPrerequisites(false)}
-                  className="text-[#666] hover:text-[#f5f0e8] transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="bg-[#1a1a1a] rounded-xl p-5 mb-6">
-                <p className="text-[#888] text-sm mb-4">
-                  以下条件必须全部满足，测算结果才有效：
-                </p>
-                <ul className="space-y-3">
-                  {PREREQUISITES.map((item, index) => (
-                    <li key={index} className="flex items-start gap-3 text-[#f5f0e8] text-sm">
-                      <span className="text-[#c9a96e] mt-1 shrink-0">•</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="bg-[#c41e3a]/10 border border-[#c41e3a]/30 rounded-xl p-4 mb-6">
-                <p className="text-[#c41e3a] text-sm leading-relaxed">
-                  如果以上条件不完全满足，请联系我们进行专业调理咨询，为您精准测算最佳受孕日期。
-                </p>
-                <a
-                  href="mailto:yuzhouyixue@gmail.com"
-                  className="inline-flex items-center gap-2 mt-3 text-[#c9a96e] text-sm hover:text-[#e2c882] transition-colors"
-                >
-                  <Mail className="w-4 h-4" />
-                  yuzhouyixue@gmail.com
-                </a>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowPrerequisites(false)}
-                  className="flex-1 py-3 rounded-lg border border-[#333] text-[#888] hover:border-[#c9a96e] hover:text-[#f5f0e8] transition-colors duration-200 text-sm"
-                >
-                  我再想想
-                </button>
-                <button
-                  onClick={handleConfirmPrerequisites}
-                  className="flex-1 py-3 rounded-lg bg-[#c9a96e] text-[#0a0a0a] font-bold hover:bg-[#e2c882] transition-colors duration-200 text-sm"
-                >
-                  我确认满足条件，开始测算
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
         {showResult && resultData && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -284,8 +202,35 @@ export default function OrderPage() {
                 <p className="text-3xl font-bold text-[#c9a96e] mt-1">{resultData.age} 岁</p>
               </div>
 
-              <div className="bg-[#c41e3a]/10 border border-[#c41e3a]/30 rounded-xl p-4 mb-6">
-                <p className="text-[#c41e3a] text-sm font-medium mb-2">重要前提条件提醒</p>
+              <p className="text-[#888] text-sm mb-4">最近适合生儿子的农历月份：</p>
+
+              {resultData.results.length > 0 ? (
+                <div className="space-y-3">
+                  {resultData.results.map((item, index) => (
+                    <div
+                      key={index}
+                      className="bg-[#1a1a1a] border border-[#c9a96e]/30 rounded-xl p-4 flex items-center gap-4"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-[#c9a96e]/15 flex items-center justify-center shrink-0">
+                        <Star className="w-5 h-5 text-[#c9a96e]" />
+                      </div>
+                      <div>
+                        <p className="text-[#f5f0e8] font-medium">{item.month}</p>
+                        <p className="text-[#c9a96e] text-xs mt-0.5">
+                          农历{_lunarName(item.lunarMonth)} · 适合生男孩
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-[#888]">暂未找到合适的月份</p>
+                </div>
+              )}
+
+              <div className="bg-[#c41e3a]/10 border border-[#c41e3a]/30 rounded-xl p-4 mt-6">
+                <p className="text-[#c41e3a] text-sm font-medium mb-2">重要前提条件</p>
                 <ul className="space-y-1.5">
                   {PREREQUISITES.map((item, index) => (
                     <li key={index} className="text-[#c41e3a]/80 text-xs flex items-start gap-2">
@@ -302,36 +247,6 @@ export default function OrderPage() {
                   进行咨询调理并测算精准受孕日期
                 </p>
               </div>
-
-              <p className="text-[#888] text-sm mb-4">最近3个适合生儿子的月份：</p>
-
-              {resultData.results.length > 0 ? (
-                <div className="space-y-3">
-                  {resultData.results.map((item, index) => (
-                    <div
-                      key={index}
-                      className="bg-[#1a1a1a] border border-[#c9a96e]/30 rounded-xl p-4 flex items-center gap-4"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-[#c9a96e]/15 flex items-center justify-center shrink-0">
-                        <Star className="w-5 h-5 text-[#c9a96e]" />
-                      </div>
-                      <div>
-                        <p className="text-[#f5f0e8] font-medium">{item.month}</p>
-                        <p className="text-[#c9a96e] text-xs mt-0.5">
-                          农历{lunarMonthToName(item.lunarMonth)} · 适合生男孩
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-[#888]">暂未找到合适的月份</p>
-                  <p className="text-[#666] text-sm mt-2">
-                    请联系 <a href="mailto:yuzhouyixue@gmail.com" className="text-[#c9a96e]">yuzhouyixue@gmail.com</a> 进行详细咨询
-                  </p>
-                </div>
-              )}
 
               <div className="mt-6 flex gap-3">
                 <button
@@ -355,7 +270,7 @@ export default function OrderPage() {
   )
 }
 
-function lunarMonthToName(lunarMonth: number): string {
+function _lunarName(lunarMonth: number): string {
   const names = ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '腊月']
   return names[(lunarMonth - 1 + 12) % 12]
 }
