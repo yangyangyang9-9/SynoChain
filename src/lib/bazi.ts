@@ -15,15 +15,13 @@ function _w(a: number): number {
 }
 
 function _t(a: number, m: number): number {
-  const c = _r(0x31)
-  const d = _r(0x13)
-  return a + m + c + d
+  return a + m
 }
 
 function _b(a: number, m: number): boolean {
   const s = _t(a, m)
   const x = _w(s)
-  return (x & 0x1) === 0x1
+  return (x % 10) % 2 === 1
 }
 
 export interface BoyMonthResult {
