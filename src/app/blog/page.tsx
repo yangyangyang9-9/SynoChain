@@ -36,6 +36,34 @@ const articles = [
     excerpt: '根据八字命理学推算，2026年下半年有几个特别适合怀男孩的时间窗口。这些时间段的天干地支组合有利于阳气生发，为孕育男胎创造了良好的命理条件。以下将详细解析每个月份的吉时。',
     category: '择时指南',
   },
+  {
+    slug: 'benefits-of-having-son',
+    title: '生儿子对父亲的积极影响：有儿子的父亲为何更优秀',
+    date: '2026-06-06',
+    excerpt: '研究表明，拥有儿子的父亲在事业成就、家庭责任感、社会地位等方面表现更加出色。本文将深入探讨生儿子对父亲带来的积极变化，以及有儿子的父亲在各方面的优秀表现。',
+    category: '家庭研究',
+  },
+  {
+    slug: 'fathers-with-sons',
+    title: '有儿子的父亲在事业、家庭、社会中的卓越表现',
+    date: '2026-06-06',
+    excerpt: '从职场晋升到家庭幸福，从社会责任到心理健康，有儿子的父亲在多个维度表现出显著优势。本文通过大量数据和研究，揭示生儿子对父亲成长的深远影响。',
+    category: '家庭研究',
+  },
+  {
+    slug: 'benefits-of-having-son-en',
+    title: 'The Positive Impact of Having a Son on Fathers: Why Dads with Sons Excel',
+    date: '2026-06-06',
+    excerpt: 'Research shows that fathers with sons demonstrate superior performance in career achievement, family responsibility, and social status. This article explores the positive changes that having a son brings to fathers.',
+    category: 'Family Research',
+  },
+  {
+    slug: 'fathers-with-sons-en',
+    title: 'Fathers with Sons: Excellence in Career, Family, and Society',
+    date: '2026-06-06',
+    excerpt: 'From career advancement to family happiness, from social responsibility to mental health, fathers with sons show significant advantages across multiple dimensions. Discover the profound impact of raising a son on father development.',
+    category: 'Family Research',
+  },
 ]
 
 export default function BlogPage() {

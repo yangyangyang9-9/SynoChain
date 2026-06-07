@@ -2,7 +2,7 @@
 
 import { useState, FormEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Loader2, X, Mail, Calendar, Star } from 'lucide-react'
+import { ArrowLeft, Loader2, X, Mail, Calendar, Star, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 import { PREREQUISITES, BoyMonthResult } from '@/lib/bazi'
 
@@ -32,7 +32,7 @@ export default function OrderPage() {
     const newErrors: FormErrors = {}
 
     if (!formData.birthDate) {
-      newErrors.birthDate = '请选择您的出生日期（农历）'
+      newErrors.birthDate = '请选择母亲的出生日期（农历）'
     }
 
     setErrors(newErrors)
@@ -83,14 +83,17 @@ export default function OrderPage() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="bg-[#111] border border-[#c9a96e] rounded-2xl p-8 md:p-12 gold-glow"
         >
-          <h1 className="text-2xl md:text-3xl font-serif text-center mb-10 bg-gradient-to-r from-[#c9a96e] to-[#e2c882] bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-3xl font-serif text-center mb-2 bg-gradient-to-r from-[#c9a96e] to-[#e2c882] bg-clip-text text-transparent">
             填写测算信息
           </h1>
+          <p className="text-center text-[#888] text-sm mb-10">
+            测算费用 <span className="text-[#c9a96e] font-bold">$199 USD</span> / 次
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-[#c9a96e] text-sm mb-2 font-medium">
-                出生日期 <span className="text-[#c41e3a]">*</span>
+                母亲的出生日期 <span className="text-[#c41e3a]">*</span>
               </label>
               <input
                 type="date"
@@ -101,7 +104,7 @@ export default function OrderPage() {
                   if (errors.birthDate) setErrors({ ...errors, birthDate: undefined })
                 }}
               />
-              <p className="text-[#666] text-xs mt-1">请输入您的农历出生日期</p>
+              <p className="text-[#666] text-xs mt-1">请输入母亲的农历出生日期</p>
               {errors.birthDate && <p className="text-[#c41e3a] text-sm mt-1">{errors.birthDate}</p>}
             </div>
 
@@ -145,8 +148,8 @@ export default function OrderPage() {
                   </>
                 ) : (
                   <>
-                    <Calendar className="w-5 h-5" />
-                    免费测算
+                    <CreditCard className="w-5 h-5" />
+                    PayPal 支付 $199 测算
                   </>
                 )}
               </button>
@@ -198,7 +201,7 @@ export default function OrderPage() {
               </div>
 
               <div className="text-center mb-6">
-                <p className="text-[#888] text-sm">您的实际年龄</p>
+                <p className="text-[#888] text-sm">母亲的当前年龄</p>
                 <p className="text-3xl font-bold text-[#c9a96e] mt-1">{resultData.age} 岁</p>
               </div>
 

@@ -8,18 +8,18 @@ import Accordion from '@/components/Accordion'
 const steps = [
   {
     icon: User,
-    title: '填写信息',
-    description: '填写您的出生日期（农历）',
+    title: '填写母亲信息',
+    description: '填写母亲的农历出生日期',
   },
   {
-    icon: Calendar,
-    title: '免费测算',
-    description: '确认前提条件，免费测算',
+    icon: CreditCard,
+    title: 'PayPal 支付',
+    description: '安全支付 $199 USD',
   },
   {
     icon: Mail,
     title: '即时结果',
-    description: '支付成功后立即获得结果',
+    description: '支付成功后立即弹窗显示结果',
   },
 ]
 
@@ -65,23 +65,23 @@ const testimonials = [
 const faqItems = [
   {
     question: '测算需要什么信息？',
-    answer: '只需提供您的农历出生日期即可，出生时辰为选填项。',
+    answer: '只需提供母亲的农历出生日期即可，出生时辰为选填项。',
   },
   {
     question: '多久能收到结果？',
-    answer: '确认前提条件后，支付成功即可立即获得测算结果。',
+    answer: '支付成功后，立即弹窗显示测算结果，无需等待。',
+  },
+  {
+    question: '测算费用是多少？',
+    answer: '每次测算 $199 USD，通过 PayPal 安全支付，全球通用。',
   },
   {
     question: '测算准确吗？',
-    answer: '基于千年传统命理学中的清宫表算法，结合现代数据处理技术，已帮助数千家庭。',
+    answer: '基于千年传统命理学中的清宫表算法，结合现代数据处理技术，已帮助数千家庭如愿以偿。',
   },
   {
     question: '支持退款吗？',
     answer: '测算结果即时显示，不支持退款。如有疑问请联系 yuzhouyixue@gmail.com。',
-  },
-  {
-    question: '需要付费吗？',
-    answer: '当前免费测算。如需精准调理方案，请联系 yuzhouyixue@gmail.com 进行专业咨询。',
   },
 ]
 
@@ -108,7 +108,7 @@ export default function Home() {
               href="#cta"
               className="px-8 py-3 bg-gold-500 text-void font-bold rounded-lg hover:bg-gold-400 transition-all duration-200 text-base"
             >
-              免费测算
+              立即测算 $199
             </a>
             <a
               href="#how-it-works"

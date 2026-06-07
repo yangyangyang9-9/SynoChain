@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://bazi-baby.com'
+  const baseUrl = 'https://baby-boy-timing.vercel.app'
 
   return [
     {
@@ -37,6 +37,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${baseUrl}/blog/best-time-conceive-boy`,
       lastModified: new Date('2026-06-01'),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/benefits-of-having-son`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/fathers-with-sons`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/benefits-of-having-son-en`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/fathers-with-sons-en`,
+      lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.7,
     },
