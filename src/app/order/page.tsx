@@ -1,71 +1,39 @@
 'use client'
 
 import { useState, FormEvent } from 'react'
-import { motion } from 'framer-motion'
-import { ArrowLeft, Loader2, ShieldCheck } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowLeft, Loader2, X, AlertTriangle, Mail, Calendar, Star } from 'lucide-react'
 import Link from 'next/link'
+import { PREREQUISITES, BoyMonthResult } from '@/lib/bazi'
 
 interface FormData {
-  name: string
-  gender: 'male' | 'female' | ''
   birthDate: string
   birthHour: string
-  email: string
 }
 
 interface FormErrors {
-  name?: string
-  gender?: string
   birthDate?: string
-  birthHour?: string
-  email?: string
 }
-
-const SHICHEN_OPTIONS = [
-  { value: 'zi', label: '子时 23:00-01:00' },
-  { value: 'chou', label: '丑时 01:00-03:00' },
-  { value: 'yin', label: '寅时 03:00-05:00' },
-  { value: 'mao', label: '卯时 05:00-07:00' },
-  { value: 'chen', label: '辰时 07:00-09:00' },
-  { value: 'si', label: '巳时 09:00-11:00' },
-  { value: 'wu', label: '午时 11:00-13:00' },
-  { value: 'wei', label: '未时 13:00-15:00' },
-  { value: 'shen', label: '申时 15:00-17:00' },
-  { value: 'you', label: '酉时 17:00-19:00' },
-  { value: 'xu', label: '戌时 19:00-21:00' },
-  { value: 'hai', label: '亥时 21:00-23:00' },
-]
 
 export default function OrderPage() {
   const [formData, setFormData] = useState<FormData>({
-    name: '',
-    gender: '',
     birthDate: '',
     birthHour: '',
-    email: '',
   })
   const [errors, setErrors] = useState<FormErrors>({})
   const [loading, setLoading] = useState(false)
+  const [showResult, setShowResult] = useState(false)
+  const [resultData, setResultData] = useState<{
+    age: number
+    results: BoyMonthResult[]
+  } | null>(null)
+  const [showPrerequisites, setShowPrerequisites] = useState(false)
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {}
 
-    if (!formData.name.trim()) {
-      newErrors.name = '请输入您的姓名'
-    }
-    if (!formData.gender) {
-      newErrors.gender = '请选择性别'
-    }
     if (!formData.birthDate) {
-      newErrors.birthDate = '请选择出生日期'
-    }
-    if (!formData.birthHour) {
-      newErrors.birthHour = '请选择出生时辰'
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = '请输入邮箱地址'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = '请输入有效的邮箱地址'
+      newErrors.birthDate = '请选择您的出生日期（农历）'
     }
 
     setErrors(newErrors)
@@ -76,34 +44,35 @@ export default function OrderPage() {
     e.preventDefault()
     if (!validate()) return
 
+    setShowPrerequisites(true)
+  }
+
+  const handleConfirmPrerequisites = async () => {
+    setShowPrerequisites(false)
     setLoading(true)
     try {
-      const res = await fetch('/api/order', {
+      const res = await fetch('/api/calculate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          birthDate: formData.birthDate,
+          birthHour: formData.birthHour || undefined,
+        }),
       })
 
       const data = await res.json()
 
       if (!res.ok) {
-        if (data.details) {
-          const apiErrors: FormErrors = {}
-          data.details.forEach((d: { path: string[]; message: string }) => {
-            const field = d.path[0] as keyof FormErrors
-            apiErrors[field] = d.message
-          })
-          setErrors(apiErrors)
-        } else {
-          setErrors({ name: data.error || '提交失败' })
-        }
+        setErrors({ birthDate: data.error || '计算失败' })
         setLoading(false)
         return
       }
 
-      window.location.href = `https://www.sandbox.paypal.com/checkoutnow?token=${data.paypalOrderId}`
+      setResultData(data)
+      setShowResult(true)
+      setLoading(false)
     } catch {
-      setErrors({ name: '网络错误，请稍后重试' })
+      setErrors({ birthDate: '网络错误，请稍后重试' })
       setLoading(false)
     }
   }
@@ -126,57 +95,9 @@ export default function OrderPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-[#c9a96e] text-sm mb-2 font-medium">姓名</label>
-              <input
-                type="text"
-                className={inputClass}
-                placeholder="请输入您的姓名"
-                value={formData.name}
-                onChange={(e) => {
-                  setFormData({ ...formData, name: e.target.value })
-                  if (errors.name) setErrors({ ...errors, name: undefined })
-                }}
-              />
-              {errors.name && <p className="text-[#c41e3a] text-sm mt-1">{errors.name}</p>}
-            </div>
-
-            <div>
-              <label className="block text-[#c9a96e] text-sm mb-2 font-medium">性别</label>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormData({ ...formData, gender: 'male' })
-                    if (errors.gender) setErrors({ ...errors, gender: undefined })
-                  }}
-                  className={`flex-1 py-3 rounded-lg border transition-all duration-200 ${
-                    formData.gender === 'male'
-                      ? 'bg-[#c9a96e] text-[#0a0a0a] border-[#c9a96e] font-medium'
-                      : 'bg-[#1a1a1a] text-[#888] border-[#333] hover:border-[#c9a96e] hover:text-[#f5f0e8]'
-                  }`}
-                >
-                  男
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormData({ ...formData, gender: 'female' })
-                    if (errors.gender) setErrors({ ...errors, gender: undefined })
-                  }}
-                  className={`flex-1 py-3 rounded-lg border transition-all duration-200 ${
-                    formData.gender === 'female'
-                      ? 'bg-[#c9a96e] text-[#0a0a0a] border-[#c9a96e] font-medium'
-                      : 'bg-[#1a1a1a] text-[#888] border-[#333] hover:border-[#c9a96e] hover:text-[#f5f0e8]'
-                  }`}
-                >
-                  女
-                </button>
-              </div>
-              {errors.gender && <p className="text-[#c41e3a] text-sm mt-1">{errors.gender}</p>}
-            </div>
-
-            <div>
-              <label className="block text-[#c9a96e] text-sm mb-2 font-medium">出生日期</label>
+              <label className="block text-[#c9a96e] text-sm mb-2 font-medium">
+                出生日期 <span className="text-[#c41e3a]">*</span>
+              </label>
               <input
                 type="date"
                 className={`${inputClass} [color-scheme:dark]`}
@@ -186,52 +107,38 @@ export default function OrderPage() {
                   if (errors.birthDate) setErrors({ ...errors, birthDate: undefined })
                 }}
               />
+              <p className="text-[#666] text-xs mt-1">请输入您的农历出生日期</p>
               {errors.birthDate && <p className="text-[#c41e3a] text-sm mt-1">{errors.birthDate}</p>}
             </div>
 
             <div>
-              <label className="block text-[#c9a96e] text-sm mb-2 font-medium">出生时辰</label>
+              <label className="block text-[#c9a96e] text-sm mb-2 font-medium">
+                出生时辰 <span className="text-[#666] text-xs">(选填)</span>
+              </label>
               <select
                 className={`${inputClass} appearance-none cursor-pointer`}
                 value={formData.birthHour}
-                onChange={(e) => {
-                  setFormData({ ...formData, birthHour: e.target.value })
-                  if (errors.birthHour) setErrors({ ...errors, birthHour: undefined })
-                }}
+                onChange={(e) => setFormData({ ...formData, birthHour: e.target.value })}
               >
                 <option value="" className="text-[#666]">
-                  请选择出生时辰
+                  请选择出生时辰（选填）
                 </option>
-                {SHICHEN_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value} className="text-white">
-                    {option.label}
-                  </option>
-                ))}
+                <option value="zi" className="text-white">子时 23:00-01:00</option>
+                <option value="chou" className="text-white">丑时 01:00-03:00</option>
+                <option value="yin" className="text-white">寅时 03:00-05:00</option>
+                <option value="mao" className="text-white">卯时 05:00-07:00</option>
+                <option value="chen" className="text-white">辰时 07:00-09:00</option>
+                <option value="si" className="text-white">巳时 09:00-11:00</option>
+                <option value="wu" className="text-white">午时 11:00-13:00</option>
+                <option value="wei" className="text-white">未时 13:00-15:00</option>
+                <option value="shen" className="text-white">申时 15:00-17:00</option>
+                <option value="you" className="text-white">酉时 17:00-19:00</option>
+                <option value="xu" className="text-white">戌时 19:00-21:00</option>
+                <option value="hai" className="text-white">亥时 21:00-23:00</option>
               </select>
-              {errors.birthHour && <p className="text-[#c41e3a] text-sm mt-1">{errors.birthHour}</p>}
             </div>
 
-            <div>
-              <label className="block text-[#c9a96e] text-sm mb-2 font-medium">邮箱</label>
-              <input
-                type="text"
-                className={inputClass}
-                placeholder="请输入您的邮箱地址"
-                value={formData.email}
-                onChange={(e) => {
-                  setFormData({ ...formData, email: e.target.value })
-                  if (errors.email) setErrors({ ...errors, email: undefined })
-                }}
-              />
-              {errors.email && <p className="text-[#c41e3a] text-sm mt-1">{errors.email}</p>}
-            </div>
-
-            <div className="pt-4 border-t border-[#333]">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-[#888]">测算服务费</span>
-                <span className="text-[#c9a96e] text-xl font-semibold">$199.00 USD</span>
-              </div>
-
+            <div className="pt-4">
               <button
                 type="submit"
                 disabled={loading}
@@ -240,12 +147,12 @@ export default function OrderPage() {
                 {loading ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    处理中...
+                    计算中...
                   </>
                 ) : (
                   <>
-                    <ShieldCheck className="w-5 h-5" />
-                    PayPal 支付 $199
+                    <Calendar className="w-5 h-5" />
+                    免费测算
                   </>
                 )}
               </button>
@@ -268,6 +175,187 @@ export default function OrderPage() {
           </Link>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {showPrerequisites && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowPrerequisites(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', duration: 0.4 }}
+              className="bg-[#111] border border-[#c9a96e] rounded-2xl p-6 md:p-8 max-w-lg w-full max-h-[80vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-[#c9a96e]" />
+                  <h2 className="text-xl font-serif text-[#c9a96e]">重要前提条件</h2>
+                </div>
+                <button
+                  onClick={() => setShowPrerequisites(false)}
+                  className="text-[#666] hover:text-[#f5f0e8] transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="bg-[#1a1a1a] rounded-xl p-5 mb-6">
+                <p className="text-[#888] text-sm mb-4">
+                  以下条件必须全部满足，测算结果才有效：
+                </p>
+                <ul className="space-y-3">
+                  {PREREQUISITES.map((item, index) => (
+                    <li key={index} className="flex items-start gap-3 text-[#f5f0e8] text-sm">
+                      <span className="text-[#c9a96e] mt-1 shrink-0">•</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-[#c41e3a]/10 border border-[#c41e3a]/30 rounded-xl p-4 mb-6">
+                <p className="text-[#c41e3a] text-sm leading-relaxed">
+                  如果以上条件不完全满足，请联系我们进行专业调理咨询，为您精准测算最佳受孕日期。
+                </p>
+                <a
+                  href="mailto:yuzhouyixue@gmail.com"
+                  className="inline-flex items-center gap-2 mt-3 text-[#c9a96e] text-sm hover:text-[#e2c882] transition-colors"
+                >
+                  <Mail className="w-4 h-4" />
+                  yuzhouyixue@gmail.com
+                </a>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowPrerequisites(false)}
+                  className="flex-1 py-3 rounded-lg border border-[#333] text-[#888] hover:border-[#c9a96e] hover:text-[#f5f0e8] transition-colors duration-200 text-sm"
+                >
+                  我再想想
+                </button>
+                <button
+                  onClick={handleConfirmPrerequisites}
+                  className="flex-1 py-3 rounded-lg bg-[#c9a96e] text-[#0a0a0a] font-bold hover:bg-[#e2c882] transition-colors duration-200 text-sm"
+                >
+                  我确认满足条件，开始测算
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showResult && resultData && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowResult(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', duration: 0.4 }}
+              className="bg-[#111] border border-[#c9a96e] rounded-2xl p-6 md:p-8 max-w-lg w-full max-h-[85vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-serif text-[#c9a96e]">测算结果</h2>
+                <button
+                  onClick={() => setShowResult(false)}
+                  className="text-[#666] hover:text-[#f5f0e8] transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="text-center mb-6">
+                <p className="text-[#888] text-sm">您的实际年龄</p>
+                <p className="text-3xl font-bold text-[#c9a96e] mt-1">{resultData.age} 岁</p>
+              </div>
+
+              <div className="bg-[#c41e3a]/10 border border-[#c41e3a]/30 rounded-xl p-4 mb-6">
+                <p className="text-[#c41e3a] text-sm font-medium mb-2">重要前提条件提醒</p>
+                <ul className="space-y-1.5">
+                  {PREREQUISITES.map((item, index) => (
+                    <li key={index} className="text-[#c41e3a]/80 text-xs flex items-start gap-2">
+                      <span className="shrink-0 mt-0.5">•</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-[#c41e3a]/70 text-xs mt-3 leading-relaxed">
+                  如条件不满足，请发邮件至
+                  <a href="mailto:yuzhouyixue@gmail.com" className="text-[#c9a96e] hover:text-[#e2c882] ml-1">
+                    yuzhouyixue@gmail.com
+                  </a>
+                  进行咨询调理并测算精准受孕日期
+                </p>
+              </div>
+
+              <p className="text-[#888] text-sm mb-4">最近3个适合生儿子的月份：</p>
+
+              {resultData.results.length > 0 ? (
+                <div className="space-y-3">
+                  {resultData.results.map((item, index) => (
+                    <div
+                      key={index}
+                      className="bg-[#1a1a1a] border border-[#c9a96e]/30 rounded-xl p-4 flex items-center gap-4"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-[#c9a96e]/15 flex items-center justify-center shrink-0">
+                        <Star className="w-5 h-5 text-[#c9a96e]" />
+                      </div>
+                      <div>
+                        <p className="text-[#f5f0e8] font-medium">{item.month}</p>
+                        <p className="text-[#c9a96e] text-xs mt-0.5">
+                          农历{lunarMonthToName(item.lunarMonth)} · 适合生男孩
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-[#888]">暂未找到合适的月份</p>
+                  <p className="text-[#666] text-sm mt-2">
+                    请联系 <a href="mailto:yuzhouyixue@gmail.com" className="text-[#c9a96e]">yuzhouyixue@gmail.com</a> 进行详细咨询
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={() => setShowResult(false)}
+                  className="flex-1 py-3 rounded-lg border border-[#333] text-[#888] hover:border-[#c9a96e] hover:text-[#f5f0e8] transition-colors duration-200 text-sm"
+                >
+                  关闭
+                </button>
+                <Link
+                  href="/"
+                  className="flex-1 py-3 rounded-lg bg-[#c9a96e] text-[#0a0a0a] font-bold hover:bg-[#e2c882] transition-colors duration-200 text-sm text-center"
+                >
+                  返回首页
+                </Link>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
+}
+
+function lunarMonthToName(lunarMonth: number): string {
+  const names = ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '腊月']
+  return names[(lunarMonth - 1 + 12) % 12]
 }

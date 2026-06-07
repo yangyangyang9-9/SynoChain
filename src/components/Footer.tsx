@@ -39,7 +39,7 @@ export default function Footer() {
             <h3 className="text-gold-500 font-medium text-sm mb-4">联系方式</h3>
             <ul className="space-y-2">
               <li className="text-parchment/50 text-sm">
-                邮箱: support@bazi-baby.com
+                邮箱: yuzhouyixue@gmail.com
               </li>
             </ul>
           </div>
