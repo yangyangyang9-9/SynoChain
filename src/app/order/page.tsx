@@ -218,10 +218,15 @@ export default function OrderPage() {
                         <Star className="w-5 h-5 text-[#c9a96e]" />
                       </div>
                       <div>
-                        <p className="text-[#f5f0e8] font-medium">{item.month}</p>
-                        <p className="text-[#c9a96e] text-xs mt-0.5">
-                          农历{_lunarName(item.lunarMonth)} · 适合生男孩
+                        <p className="text-[#f5f0e8] font-medium text-base">
+                          农历{_lunarName(item.lunarMonth)}
                         </p>
+                        <p className="text-[#888] text-xs mt-0.5">
+                          新历 {item.gregorianRange}
+                        </p>
+                        <span className="inline-block mt-1 px-2 py-0.5 bg-[#c9a96e]/10 border border-[#c9a96e]/30 rounded text-[#c9a96e] text-xs">
+                          适合生男孩
+                        </span>
                       </div>
                     </div>
                   ))}

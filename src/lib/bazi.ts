@@ -3,6 +3,7 @@ export interface BoyMonthResult {
   lunarMonth: number
   isBoy: boolean
   distance: number
+  gregorianRange: string
 }
 
 export interface CalculationResult {
@@ -39,6 +40,45 @@ function getCircularDistance(from: number, to: number): number {
   return d
 }
 
+// 2026年各农历月对应的公历起始日（基于正月初一=2月17日推算）
+// 奇数月30天，偶数月29天
+const LUNAR_MONTH_STARTS: Record<number, { month: number; day: number }> = {
+  1:  { month: 2, day: 17 },  // 正月
+  2:  { month: 3, day: 19 },  // 二月
+  3:  { month: 4, day: 17 },  // 三月
+  4:  { month: 5, day: 17 },  // 四月
+  5:  { month: 6, day: 15 },  // 五月
+  6:  { month: 7, day: 15 },  // 六月
+  7:  { month: 8, day: 13 },  // 七月
+  8:  { month: 9, day: 11 },  // 八月
+  9:  { month: 10, day: 10 }, // 九月
+  10: { month: 11, day: 9 },  // 十月
+  11: { month: 12, day: 8 },  // 十一月
+  12: { month: 1, day: 6 },   // 十二月（跨年）
+}
+
+const LUNAR_MONTH_DAYS: Record<number, number> = {
+  1: 30, 2: 29, 3: 30, 4: 29, 5: 30, 6: 29,
+  7: 30, 8: 29, 9: 30, 10: 29, 11: 30, 12: 29,
+}
+
+function getGregorianRange(lunarMonth: number): string {
+  const start = LUNAR_MONTH_STARTS[lunarMonth]
+  const days = LUNAR_MONTH_DAYS[lunarMonth]
+  if (!start || !days) return ''
+
+  // 计算结束日期
+  let endMonth = start.month
+  let endDay = start.day + days - 1
+  const daysInStartMonth = new Date(2026, start.month, 0).getDate()
+  if (endDay > daysInStartMonth) {
+    endDay -= daysInStartMonth
+    endMonth++
+  }
+
+  return `${start.month}月${start.day}日 - ${endMonth}月${endDay}日`
+}
+
 export function calculateBoyMonths(birthYear: number): CalculationResult {
   const now = new Date()
   const currentYear = now.getFullYear()
@@ -60,6 +100,7 @@ export function calculateBoyMonths(birthYear: number): CalculationResult {
       lunarMonth,
       isBoy,
       distance,
+      gregorianRange: getGregorianRange(lunarMonth),
     })
   }
 
