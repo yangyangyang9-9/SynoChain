@@ -66,7 +66,7 @@ export function calculateBoyMonths(birthYear: number): CalculationResult {
   const suitableMonths = boyMonths.filter(m => m.isBoy)
   suitableMonths.sort((a, b) => a.distance - b.distance)
 
-  const results = suitableMonths.slice(0, 2)
+  const results = suitableMonths.slice(0, 3)
 
   return {
     age,
