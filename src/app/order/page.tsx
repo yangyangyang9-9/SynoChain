@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Loader2, X, Mail, Calendar, Star, CreditCard } from 'lucide-react'
+import { ArrowLeft, Loader2, X, Mail, Star, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 import { PREREQUISITES, BoyMonthResult } from '@/lib/bazi'
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
 
 interface FormData {
   birthDate: string
@@ -15,7 +16,9 @@ interface FormErrors {
   birthDate?: string
 }
 
-export default function OrderPage() {
+const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || ''
+
+function OrderForm() {
   const [formData, setFormData] = useState<FormData>({
     birthDate: '',
     birthHour: '',
@@ -27,55 +30,57 @@ export default function OrderPage() {
     age: number
     results: BoyMonthResult[]
   } | null>(null)
+  const [paymentStep, setPaymentStep] = useState<'form' | 'paying' | 'paid'>('form')
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {}
-
     if (!formData.birthDate) {
       newErrors.birthDate = '请选择母亲的出生日期（农历）'
     }
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    if (!validate()) return
-
+  const handlePaymentSuccess = useCallback(async (orderId: string) => {
     setLoading(true)
+    setPaymentStep('paid')
     try {
-      const res = await fetch('/api/calculate', {
+      const res = await fetch('/api/payments/capture-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          orderId,
           birthDate: formData.birthDate,
-          birthHour: formData.birthHour || undefined,
         }),
       })
 
       const data = await res.json()
 
       if (!res.ok) {
-        setErrors({ birthDate: data.error || '计算失败' })
+        setErrors({ birthDate: data.error || '支付确认失败' })
         setLoading(false)
+        setPaymentStep('form')
         return
       }
 
-      setResultData(data)
-      setShowResult(true)
-      setLoading(false)
+      if (data.success && data.result) {
+        setResultData(data.result)
+        setShowResult(true)
+      } else {
+        setErrors({ birthDate: '获取测算结果失败' })
+      }
     } catch {
       setErrors({ birthDate: '网络错误，请稍后重试' })
+    } finally {
       setLoading(false)
     }
-  }
+  }, [formData.birthDate])
 
   const inputClass =
     'w-full bg-[#1a1a1a] border border-[#333] rounded-lg p-3 text-white placeholder-[#666] focus:outline-none focus:border-[#c9a96e] transition-colors duration-200'
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
+    <>
       <div className="w-full max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -90,7 +95,7 @@ export default function OrderPage() {
             测算费用 <span className="text-[#c9a96e] font-bold">$199 USD</span> / 次
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-6">
             <div>
               <label className="block text-[#c9a96e] text-sm mb-2 font-medium">
                 母亲的出生日期 <span className="text-[#c41e3a]">*</span>
@@ -103,6 +108,7 @@ export default function OrderPage() {
                   setFormData({ ...formData, birthDate: e.target.value })
                   if (errors.birthDate) setErrors({ ...errors, birthDate: undefined })
                 }}
+                disabled={paymentStep !== 'form'}
               />
               <p className="text-[#666] text-xs mt-1">请输入母亲的农历出生日期</p>
               {errors.birthDate && <p className="text-[#c41e3a] text-sm mt-1">{errors.birthDate}</p>}
@@ -116,6 +122,7 @@ export default function OrderPage() {
                 className={`${inputClass} appearance-none cursor-pointer`}
                 value={formData.birthHour}
                 onChange={(e) => setFormData({ ...formData, birthHour: e.target.value })}
+                disabled={paymentStep !== 'form'}
               >
                 <option value="" className="text-[#666]">
                   请选择出生时辰（选填）
@@ -136,25 +143,77 @@ export default function OrderPage() {
             </div>
 
             <div className="pt-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-4 bg-[#c9a96e] text-[#0a0a0a] font-bold rounded-lg hover:bg-[#e2c882] transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    计算中...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5" />
-                    PayPal 支付 $199 测算
-                  </>
-                )}
-              </button>
+              {paymentStep === 'form' || paymentStep === 'paid' ? (
+                <PayPalScriptProvider
+                  options={{
+                    clientId: PAYPAL_CLIENT_ID,
+                    currency: 'USD',
+                    intent: 'capture',
+                  }}
+                >
+                  <PayPalButtons
+                    style={{
+                      shape: 'rect',
+                      layout: 'vertical',
+                      color: 'gold',
+                      label: 'pay',
+                      height: 48,
+                    }}
+                    disabled={!formData.birthDate || paymentStep !== 'form'}
+                    createOrder={async () => {
+                      if (!validate()) {
+                        throw new Error('表单验证失败')
+                      }
+                      setPaymentStep('paying')
+                      const res = await fetch('/api/payments/create-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          birthDate: formData.birthDate,
+                          birthHour: formData.birthHour || undefined,
+                        }),
+                      })
+                      const data = await res.json()
+                      if (!res.ok) {
+                        setErrors({ birthDate: data.error || '创建订单失败' })
+                        setPaymentStep('form')
+                        throw new Error(data.error || '创建订单失败')
+                      }
+                      return data.orderId
+                    }}
+                    onApprove={async (data) => {
+                      if (data.orderID) {
+                        await handlePaymentSuccess(data.orderID)
+                      }
+                    }}
+                    onCancel={() => {
+                      setPaymentStep('form')
+                      setErrors({ birthDate: '支付已取消' })
+                    }}
+                    onError={(err) => {
+                      console.error('PayPal error:', err)
+                      setPaymentStep('form')
+                      setErrors({ birthDate: '支付出错，请重试' })
+                    }}
+                  />
+                </PayPalScriptProvider>
+              ) : null}
+
+              {paymentStep === 'paying' && (
+                <div className="w-full py-4 bg-[#c9a96e]/20 text-[#c9a96e] font-bold rounded-lg flex items-center justify-center gap-2 text-lg">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  正在跳转支付...
+                </div>
+              )}
+
+              {paymentStep === 'paid' && loading && (
+                <div className="w-full py-4 bg-[#c9a96e]/20 text-[#c9a96e] font-bold rounded-lg flex items-center justify-center gap-2 text-lg">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  支付成功，正在测算...
+                </div>
+              )}
             </div>
-          </form>
+          </div>
         </motion.div>
 
         <motion.div
@@ -274,8 +333,12 @@ export default function OrderPage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   )
+}
+
+export default function OrderPage() {
+  return <OrderForm />
 }
 
 function _lunarName(lunarMonth: number): string {
