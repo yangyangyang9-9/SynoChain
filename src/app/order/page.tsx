@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Loader2, X, Mail, Star, CreditCard } from 'lucide-react'
+import { ArrowLeft, Loader2, X, Star } from 'lucide-react'
 import Link from 'next/link'
 import { PREREQUISITES, BoyMonthResult } from '@/lib/bazi'
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
@@ -16,7 +16,7 @@ interface FormErrors {
   birthDate?: string
 }
 
-const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || ''
+const PAYPAL_CLIENT_ID = 'AWSVZ_eW6j4j0z8Z_4KdhAEeG-9OMo4SwMZ1X8JsG6RCqIkmtTDgINfjD4Ds_LVweju9u_YL-VmCfGiM'
 
 function OrderForm() {
   const [formData, setFormData] = useState<FormData>({
@@ -239,7 +239,10 @@ function OrderForm() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
-            onClick={() => setShowResult(false)}
+            onClick={() => {
+              setShowResult(false)
+              setPaymentStep('form')
+            }}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -252,7 +255,10 @@ function OrderForm() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-serif text-[#c9a96e]">测算结果</h2>
                 <button
-                  onClick={() => setShowResult(false)}
+                  onClick={() => {
+                    setShowResult(false)
+                    setPaymentStep('form')
+                  }}
                   className="text-[#666] hover:text-[#f5f0e8] transition-colors"
                 >
                   <X className="w-5 h-5" />
@@ -317,7 +323,10 @@ function OrderForm() {
 
               <div className="mt-6 flex gap-3">
                 <button
-                  onClick={() => setShowResult(false)}
+                  onClick={() => {
+                    setShowResult(false)
+                    setPaymentStep('form')
+                  }}
                   className="flex-1 py-3 rounded-lg border border-[#333] text-[#888] hover:border-[#c9a96e] hover:text-[#f5f0e8] transition-colors duration-200 text-sm"
                 >
                   关闭
