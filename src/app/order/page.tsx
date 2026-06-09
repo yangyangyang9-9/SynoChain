@@ -16,7 +16,7 @@ interface FormErrors {
   birthDate?: string
 }
 
-const PAYPAL_CLIENT_ID = 'AWSVZ_eW6j4j0z8Z_4KdhAEeG-9OMo4SwMZ1X8JsG6RCqIkmtTDgINfjD4Ds_LVweju9u_YL-VmCfGiM'
+const PAYPAL_CLIENT_ID = 'AbihYVkuRXCYaU49TO0QCLlCpH5srnNl0-43eJLUb-rU4fLwkfQKMHvIJLnjf3hRHX5X5FVcrkFsxWeM'
 
 function OrderForm() {
   const [formData, setFormData] = useState<FormData>({
