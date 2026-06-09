@@ -97,10 +97,12 @@ function OrderForm() {
 
           <div className="space-y-6">
             <div>
-              <label className="block text-[#c9a96e] text-sm mb-2 font-medium">
+              <label className="block text-[#c9a96e] text-sm mb-2 font-medium" htmlFor="birthDate">
                 母亲的出生日期 <span className="text-[#c41e3a]">*</span>
               </label>
               <input
+                id="birthDate"
+                name="birthDate"
                 type="date"
                 className={`${inputClass} [color-scheme:dark]`}
                 value={formData.birthDate}
@@ -115,10 +117,12 @@ function OrderForm() {
             </div>
 
             <div>
-              <label className="block text-[#c9a96e] text-sm mb-2 font-medium">
+              <label className="block text-[#c9a96e] text-sm mb-2 font-medium" htmlFor="birthHour">
                 出生时辰 <span className="text-[#666] text-xs">(选填)</span>
               </label>
               <select
+                id="birthHour"
+                name="birthHour"
                 className={`${inputClass} appearance-none cursor-pointer`}
                 value={formData.birthHour}
                 onChange={(e) => setFormData({ ...formData, birthHour: e.target.value })}
@@ -165,21 +169,31 @@ function OrderForm() {
                         throw new Error('表单验证失败')
                       }
                       setPaymentStep('paying')
-                      const res = await fetch('/api/payments/create-order', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          birthDate: formData.birthDate,
-                          birthHour: formData.birthHour || undefined,
-                        }),
-                      })
-                      const data = await res.json()
-                      if (!res.ok) {
-                        setErrors({ birthDate: data.error || '创建订单失败' })
+                      try {
+                        const res = await fetch('/api/payments/create-order', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            birthDate: formData.birthDate,
+                            birthHour: formData.birthHour || undefined,
+                          }),
+                        })
+                        const data = await res.json()
+                        if (!res.ok) {
+                          setErrors({ birthDate: data.error || '创建订单失败' })
+                          setPaymentStep('form')
+                          throw new Error(data.error || '创建订单失败')
+                        }
+                        return data.orderId
+                      } catch (err) {
+                        // 网络错误或 API 异常时立即恢复按钮状态
+                        if (err instanceof Error && err.message === '表单验证失败') {
+                          throw err
+                        }
                         setPaymentStep('form')
-                        throw new Error(data.error || '创建订单失败')
+                        setErrors({ birthDate: '支付服务连接失败，请重试' })
+                        throw err
                       }
-                      return data.orderId
                     }}
                     onApprove={async (data) => {
                       if (data.orderID) {
