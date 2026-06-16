@@ -1,249 +1,150 @@
-import { User, CreditCard, Mail, Star, ChevronDown, Calendar, Droplets, Compass } from 'lucide-react'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
-import Particles from '@/components/Particles'
-import YinYang from '@/components/YinYang'
-import Accordion from '@/components/Accordion'
+'use client'
 
-const steps = [
-  {
-    icon: User,
-    title: '填写母亲信息',
-    description: '填写母亲的农历出生日期',
-  },
-  {
-    icon: CreditCard,
-    title: 'PayPal 支付',
-    description: '安全支付 $199 USD',
-  },
-  {
-    icon: Mail,
-    title: '即时结果',
-    description: '支付成功后立即弹窗显示结果',
-  },
-]
-
-const principles = [
-  {
-    icon: Calendar,
-    title: '八字排盘',
-    description: '根据您提供的出生日期与时辰，精准排出四柱八字，分析命主五行旺衰与格局高低。',
-  },
-  {
-    icon: Droplets,
-    title: '五行分析',
-    description: '通过五行生克制化原理，推算子女宫与子嗣运，判断最佳受孕时机与性别倾向。',
-  },
-  {
-    icon: Compass,
-    title: '择时推荐',
-    description: '结合流年流月五行流转，为您推荐未来数月中最利于怀男孩的黄金时间窗口。',
-  },
-]
-
-const testimonials = [
-  {
-    initials: 'LS',
-    name: '李女士',
-    stars: 5,
-    quote: '按照测算的时间备孕，真的如愿以偿生了儿子！非常感谢必生儿子团队的专业服务。',
-  },
-  {
-    initials: 'WX',
-    name: '王先生',
-    stars: 5,
-    quote: '报告非常详细，不仅有最佳时间推荐，还有调理建议。专业性让人信服。',
-  },
-  {
-    initials: 'ZM',
-    name: '张妈妈',
-    stars: 5,
-    quote: '一开始半信半疑，但收到报告后发现分析很透彻。现在已经怀孕了，期待好消息！',
-  },
-]
-
-const faqItems = [
-  {
-    question: '测算需要什么信息？',
-    answer: '只需提供母亲的农历出生日期即可，出生时辰为选填项。',
-  },
-  {
-    question: '多久能收到结果？',
-    answer: '支付成功后，立即弹窗显示测算结果，无需等待。',
-  },
-  {
-    question: '测算费用是多少？',
-    answer: '每次测算 $199 USD，通过 PayPal 安全支付，全球通用。',
-  },
-  {
-    question: '测算准确吗？',
-    answer: '基于千年传统命理学中的清宫表算法，结合现代数据处理技术，已帮助数千家庭如愿以偿。',
-  },
-  {
-    question: '支持退款吗？',
-    answer: '测算结果即时显示，不支持退款。如有疑问请联系 yuzhouyixue@gmail.com。',
-  },
-]
+import { useEffect } from 'react'
+import { useGameStore } from '@/lib/store'
+import { createClient } from '@/lib/supabase'
+import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
+import '@/lib/i18n'
 
 export default function Home() {
+  const { t, i18n } = useTranslation()
+  const { user, setUser, loading } = useGameStore()
+
+  useEffect(() => {
+    const supabase = createClient()
+    
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data }) => {
+            if (data) setUser(data)
+          })
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data }) => {
+            if (data) setUser(data)
+          })
+      } else {
+        setUser(null)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [setUser])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-primary text-2xl">{t('common.loading')}</div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-void text-parchment relative">
-      <Particles />
-      <Navbar />
-
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-4 pt-16">
-        <div className="absolute top-20 right-10 md:top-32 md:right-20">
-          <YinYang />
-        </div>
-
-        <div className="text-center z-10 max-w-4xl mx-auto">
-          <h1 className="text-7xl md:text-8xl font-bold font-serif gold-gradient leading-tight opacity-0 fade-in-up stagger-1">
-            必生儿子
-          </h1>
-          <p className="mt-6 text-lg md:text-xl text-parchment/70 leading-relaxed opacity-0 fade-in-up stagger-2">
-            基于千年八字命理学，AI 精准计算最佳怀男孩时间
-          </p>
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 opacity-0 fade-in-up stagger-3">
-            <a
-              href="#cta"
-              className="px-8 py-3 bg-gold-500 text-void font-bold rounded-lg hover:bg-gold-400 transition-all duration-200 text-base"
+    <div className="min-h-screen bg-darker">
+      {/* Header */}
+      <header className="bg-card border-b border-border">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="pixel-text text-primary text-2xl">{t('app.title')}</h1>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => i18n.changeLanguage(i18n.language === 'zh' ? 'en' : 'zh')}
+              className="px-4 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition"
             >
-              立即测算 $199
-            </a>
-            <a
-              href="#how-it-works"
-              className="px-8 py-3 border border-[#c9a96e]/50 text-gold-500 rounded-lg hover:bg-[#c9a96e]/10 transition-all duration-200 text-base"
-            >
-              了解更多
-            </a>
+              {i18n.language === 'zh' ? 'EN' : '中文'}
+            </button>
+            {user ? (
+              <Link href="/game" className="btn-primary">
+                {t('nav.game')}
+              </Link>
+            ) : (
+              <Link href="/login" className="btn-primary">
+                {t('nav.login')}
+              </Link>
+            )}
           </div>
         </div>
+      </header>
 
-        <div className="absolute bottom-8 animate-bounce">
-          <ChevronDown size={28} className="text-gold-500/50" />
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-20 text-center">
+        <h2 className="text-5xl font-bold text-primary mb-6 neon-text">
+          {t('home.welcome')}
+        </h2>
+        <p className="text-xl text-white/80 mb-12 max-w-2xl mx-auto">
+          {t('home.description')}
+        </p>
+        <div className="flex gap-4 justify-center">
+          <Link href="/game" className="btn-primary text-lg px-8 py-4">
+            {t('home.startGame')}
+          </Link>
+          <Link href="/ranking" className="btn-success text-lg px-8 py-4">
+            {t('home.viewRanking')}
+          </Link>
         </div>
       </section>
 
-      <section id="how-it-works" className="py-20 px-4">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold font-serif text-center gold-gradient">
-            三步测算流程
-          </h2>
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {steps.map((step, index) => (
-              <div
-                key={index}
-                className="border border-[#c9a96e]/20 rounded-xl p-8 text-center bg-[#0a0a0a] gold-glow hover:border-[#c9a96e]/40 transition-all duration-300"
-              >
-                <div className="w-14 h-14 mx-auto rounded-full bg-[#c9a96e]/10 flex items-center justify-center mb-5">
-                  <step.icon size={26} className="text-gold-500" />
-                </div>
-                <h3 className="text-xl font-bold font-serif text-gold-500 mb-3">
-                  {step.title}
-                </h3>
-                <p className="text-parchment/50 text-sm leading-relaxed">
-                  {step.description}
-                </p>
+      {/* Features Section */}
+      <section className="container mx-auto px-4 py-20">
+        <h3 className="text-3xl font-bold text-center text-primary mb-12">
+          {t('home.features.title')}
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {(t('home.features.items', { returnObjects: true }) as any[]).map((item: any, index) => (
+            <div key={index} className="game-card p-6">
+              <h4 className="text-xl font-bold text-primary mb-3">{item.title}</h4>
+              <p className="text-white/70">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      {user && (
+        <section className="container mx-auto px-4 py-20">
+          <div className="game-card p-8 max-w-4xl mx-auto">
+            <h3 className="text-2xl font-bold text-primary mb-6 text-center">你的状态</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              <div>
+                <div className="text-3xl font-bold text-primary">{user.current_level}</div>
+                <div className="text-white/60">{t('game.currentLevel')}</div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="principles" className="py-20 px-4 bg-[#0a0a0a]/50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold font-serif text-center gold-gradient">
-            命理原理
-          </h2>
-          <p className="mt-4 text-center text-parchment/50 text-sm max-w-2xl mx-auto leading-relaxed">
-            八字命理学认为，子嗣性别与父母八字中的阴阳五行配置密切相关。
-            通过精准分析命局子女宫与流年流月的五行互动，可以推算出最利于怀男孩的时间窗口。
-          </p>
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {principles.map((item, index) => (
-              <div
-                key={index}
-                className="border border-[#c9a96e]/20 rounded-xl p-8 bg-[#0a0a0a] gold-glow"
-              >
-                <div className="w-12 h-12 rounded-lg bg-[#c9a96e]/10 flex items-center justify-center mb-5">
-                  <item.icon size={24} className="text-gold-500" />
-                </div>
-                <h3 className="text-lg font-bold font-serif text-gold-500 mb-3">
-                  {item.title}
-                </h3>
-                <p className="text-parchment/50 text-sm leading-relaxed">
-                  {item.description}
-                </p>
+              <div>
+                <div className="text-3xl font-bold text-secondary">{user.lives}</div>
+                <div className="text-white/60">{t('game.lives')}</div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="testimonials" className="py-20 px-4">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold font-serif text-center gold-gradient">
-            用户反馈
-          </h2>
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t, index) => (
-              <div
-                key={index}
-                className="border border-[#c9a96e]/20 rounded-xl p-6 bg-[#0a0a0a] gold-glow"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[#c9a96e]/15 flex items-center justify-center">
-                    <span className="text-gold-500 text-sm font-bold">{t.initials}</span>
-                  </div>
-                  <div>
-                    <p className="text-parchment text-sm font-medium">{t.name}</p>
-                    <div className="flex gap-0.5 mt-0.5">
-                      {Array.from({ length: t.stars }).map((_, i) => (
-                        <Star key={i} size={12} className="text-gold-500 fill-gold-500" />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <p className="text-parchment/50 text-sm leading-relaxed italic">
-                  &ldquo;{t.quote}&rdquo;
-                </p>
+              <div>
+                <div className="text-3xl font-bold text-warning">{user.coins}</div>
+                <div className="text-white/60">{t('game.coins')}</div>
               </div>
-            ))}
+              <div>
+                <div className="text-3xl font-bold text-success">{user.skip_cards + user.revive_cards + user.speed_cards}</div>
+                <div className="text-white/60">道具</div>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section id="faq" className="py-20 px-4 bg-[#0a0a0a]/50">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold font-serif text-center gold-gradient">
-            常见问题
-          </h2>
-          <div className="mt-12">
-            <Accordion items={faqItems} />
-          </div>
+      {/* Footer */}
+      <footer className="bg-card border-t border-border py-8">
+        <div className="container mx-auto px-4 text-center text-white/60">
+          <p>&copy; 2024 Health Quest. All rights reserved.</p>
         </div>
-      </section>
-
-      <section id="cta" className="py-24 px-4">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-5xl font-bold font-serif gold-gradient leading-tight">
-            准备好迎接您的儿子了吗？
-          </h2>
-          <p className="mt-4 text-parchment/50 text-base">
-            立即开始您的专属测算，科学择时，心想事成
-          </p>
-          <div className="mt-8">
-            <a
-              href="/order"
-              className="inline-block px-10 py-4 bg-gold-500 text-void font-bold rounded-lg hover:bg-gold-400 transition-all duration-200 text-lg gold-glow"
-            >
-              立即开始测算
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
+      </footer>
     </div>
   )
 }

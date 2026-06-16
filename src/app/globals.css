@@ -1,22 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-serif: 'Noto Serif SC', serif;
+  --font-pixel: 'Press Start 2P', cursive;
   --font-sans: 'Noto Sans SC', sans-serif;
-  --color-gold-50: #fdf8ed;
-  --color-gold-100: #f9edcc;
-  --color-gold-200: #f3d994;
-  --color-gold-300: #ecc55c;
-  --color-gold-400: #e6b236;
-  --color-gold-500: #c9a96e;
-  --color-gold-600: #a88a4e;
-  --color-gold-700: #8b7355;
-  --color-gold-800: #6b5a3e;
-  --color-gold-900: #4a3e2a;
-  --color-void: #0a0a0a;
-  --color-ember: #c41e3a;
-  --color-parchment: #f5f0e8;
+  --color-primary: #00d9ff;
+  --color-secondary: #ff6b6b;
+  --color-success: #4ecdc4;
+  --color-warning: #ffe66d;
+  --color-danger: #ff4757;
+  --color-dark: #1a1a2e;
+  --color-darker: #0f0f1a;
+  --color-card: #16213e;
+  --color-border: #0f3460;
 }
 
 * {
@@ -24,78 +20,146 @@
 }
 
 body {
-  background: #0a0a0a;
-  color: #f5f0e8;
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+  color: #ffffff;
   font-family: 'Noto Sans SC', sans-serif;
   overflow-x: hidden;
+  min-height: 100vh;
 }
 
 ::selection {
-  background: #c9a96e33;
-  color: #c9a96e;
+  background: #00d9ff33;
+  color: #00d9ff;
 }
 
-.gold-gradient {
-  background: linear-gradient(135deg, #c9a96e 0%, #f3d994 30%, #c9a96e 60%, #8b7355 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* Pixel text style */
+.pixel-text {
+  font-family: 'Press Start 2P', cursive;
+  letter-spacing: 1px;
 }
 
-.gold-border {
-  border: 1px solid;
-  border-image: linear-gradient(135deg, #c9a96e, #8b7355, #c9a96e) 1;
+/* Neon glow effects */
+.neon-glow {
+  box-shadow: 0 0 10px #00d9ff, 0 0 20px #00d9ff, 0 0 40px #00d9ff;
 }
 
-.gold-glow {
-  box-shadow: 0 0 30px rgba(201, 169, 110, 0.15), 0 0 60px rgba(201, 169, 110, 0.05);
+.neon-glow-success {
+  box-shadow: 0 0 10px #4ecdc4, 0 0 20px #4ecdc4, 0 0 40px #4ecdc4;
 }
 
-.gold-glow-hover:hover {
-  box-shadow: 0 0 40px rgba(201, 169, 110, 0.25), 0 0 80px rgba(201, 169, 110, 0.1);
-  transform: translateY(-2px);
+.neon-glow-danger {
+  box-shadow: 0 0 10px #ff4757, 0 0 20px #ff4757, 0 0 40px #ff4757;
+}
+
+.neon-text {
+  text-shadow: 0 0 5px #00d9ff, 0 0 10px #00d9ff, 0 0 20px #00d9ff;
+}
+
+.neon-text-success {
+  text-shadow: 0 0 5px #4ecdc4, 0 0 10px #4ecdc4, 0 0 20px #4ecdc4;
+}
+
+.neon-text-danger {
+  text-shadow: 0 0 5px #ff4757, 0 0 10px #ff4757, 0 0 20px #ff4757;
+}
+
+/* Card styles */
+.game-card {
+  background: linear-gradient(145deg, #16213e 0%, #1a1a2e 100%);
+  border: 2px solid #0f3460;
+  border-radius: 16px;
   transition: all 0.3s ease;
 }
 
-.yin-yang {
-  animation: spin 20s linear infinite;
+.game-card:hover {
+  border-color: #00d9ff;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+  transform: translateY(-4px);
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* Progress bar */
+.progress-bar {
+  background: linear-gradient(90deg, #4ecdc4 0%, #00d9ff 100%);
+  border-radius: 999px;
+  transition: width 0.5s ease;
 }
 
-.cloud-float {
-  animation: cloudFloat 8s ease-in-out infinite;
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+  color: #ffffff;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
 }
 
-@keyframes cloudFloat {
-  0%, 100% { transform: translateX(0) translateY(0); }
-  25% { transform: translateX(10px) translateY(-5px); }
-  50% { transform: translateX(0) translateY(-10px); }
-  75% { transform: translateX(-10px) translateY(-5px); }
+.btn-primary:hover {
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+  transform: translateY(-2px);
 }
 
-.particle {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: #c9a96e;
-  border-radius: 50%;
-  animation: particleFloat 6s ease-in-out infinite;
-  opacity: 0;
+.btn-success {
+  background: linear-gradient(135deg, #4ecdc4 0%, #26a69a 100%);
+  color: #ffffff;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
 }
 
-@keyframes particleFloat {
-  0% { opacity: 0; transform: translateY(0) scale(0); }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-100px) scale(1); }
+.btn-success:hover {
+  box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+  transform: translateY(-2px);
 }
 
-.fade-in-up {
-  animation: fadeInUp 0.8s ease-out forwards;
+.btn-danger {
+  background: linear-gradient(135deg, #ff4757 0%, #c0392b 100%);
+  color: #ffffff;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px #00d9ff, 0 0 20px #00d9ff; }
+  50% { box-shadow: 0 0 20px #00d9ff, 0 0 40px #00d9ff, 0 0 60px #00d9ff; }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out;
 }
 
 @keyframes fadeInUp {
@@ -103,8 +167,29 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.stagger-1 { animation-delay: 0.1s; }
-.stagger-2 { animation-delay: 0.2s; }
-.stagger-3 { animation-delay: 0.3s; }
-.stagger-4 { animation-delay: 0.4s; }
-.stagger-5 { animation-delay: 0.5s; }
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.stagger-1 { animation-delay: 0.1s; opacity: 0; }
+.stagger-2 { animation-delay: 0.2s; opacity: 0; }
+.stagger-3 { animation-delay: 0.3s; opacity: 0; }
+.stagger-4 { animation-delay: 0.4s; opacity: 0; }
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a2e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0f3460;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00d9ff;
+}
